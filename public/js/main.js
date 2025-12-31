@@ -7,12 +7,96 @@ document.addEventListener('DOMContentLoaded', function() {
       bsAlert.close();
     }, 5000);
   });
+
+  // Global confirmation modal handler
+  const confirmModalEl = document.getElementById('confirmModal');
+  const confirmModalTitleEl = document.getElementById('confirmModalTitle');
+  const confirmModalMessageEl = document.getElementById('confirmModalMessage');
+  const confirmModalOkBtn = document.getElementById('confirmModalOk');
+  const confirmModal = confirmModalEl ? new bootstrap.Modal(confirmModalEl) : null;
+  let pendingConfirmAction = null;
+
+  function openConfirmModal(options) {
+    if (!confirmModal) {
+      // Fallback (shouldn't happen on pages using navbar)
+      const ok = window.confirm(options.message || 'Apakah Anda yakin?');
+      if (ok && typeof options.onConfirm === 'function') options.onConfirm();
+      return;
+    }
+
+    confirmModalTitleEl.textContent = options.title || 'Konfirmasi';
+    confirmModalMessageEl.textContent = options.message || 'Apakah Anda yakin?';
+    confirmModalOkBtn.textContent = options.confirmText || 'Ya, Lanjutkan';
+    confirmModalOkBtn.className = `btn ${options.confirmBtnClass || 'btn-primary'}`;
+    pendingConfirmAction = typeof options.onConfirm === 'function' ? options.onConfirm : null;
+    confirmModal.show();
+  }
+
+  if (confirmModalOkBtn) {
+    confirmModalOkBtn.addEventListener('click', function() {
+      const action = pendingConfirmAction;
+      pendingConfirmAction = null;
+      if (confirmModal) confirmModal.hide();
+      if (action) action();
+    });
+  }
+
+  // Intercept form submits that request confirmation
+  document.addEventListener('submit', function(e) {
+    const form = e.target;
+    if (!(form instanceof HTMLFormElement)) return;
+
+    const message = form.getAttribute('data-confirm');
+    if (!message) return;
+
+    e.preventDefault();
+    openConfirmModal({
+      message,
+      confirmBtnClass: form.getAttribute('data-confirm-btn-class') || 'btn-primary',
+      confirmText: form.getAttribute('data-confirm-ok-text') || 'Ya, Lanjutkan',
+      onConfirm: () => form.submit()
+    });
+  });
+
+  // Intercept link clicks that request confirmation
+  document.addEventListener('click', function(e) {
+    const link = e.target.closest && e.target.closest('a[data-confirm]');
+    if (!link) return;
+    const href = link.getAttribute('href');
+    if (!href || href === '#') return;
+
+    e.preventDefault();
+    openConfirmModal({
+      message: link.getAttribute('data-confirm') || 'Apakah Anda yakin? ',
+      confirmBtnClass: link.getAttribute('data-confirm-btn-class') || 'btn-primary',
+      confirmText: link.getAttribute('data-confirm-ok-text') || 'Ya, Lanjutkan',
+      onConfirm: () => {
+        window.location.href = href;
+      }
+    });
+  });
 });
 
-// Confirmation before delete
-function confirmDelete(message) {
-  return confirm(message || 'Apakah Anda yakin ingin menghapus data ini?');
-}
+// Client-side Bootstrap alert helper (replaces window.alert)
+window.showClientAlert = function(message, type) {
+  const alertType = type || 'danger';
+  const container = document.querySelector('main') || document.body;
+
+  let wrapper = container.querySelector('[data-client-alert-host]');
+  if (!wrapper) {
+    wrapper = document.createElement('div');
+    wrapper.setAttribute('data-client-alert-host', 'true');
+    wrapper.className = 'mb-3';
+    container.prepend(wrapper);
+  }
+
+  wrapper.innerHTML = `
+    <div class="alert alert-${alertType} alert-dismissible fade show" role="alert">
+      ${String(message || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  `;
+};
 
 // Mark notification as read
 async function markAsRead(notificationId) {

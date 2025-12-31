@@ -157,7 +157,7 @@ h2 i {
 }
 
 .card:hover {
-  transform: translateY(-4px);
+  transform: none;
   box-shadow: 0 8px 20px rgba(156, 171, 136, 0.2);
 }
 
@@ -353,12 +353,12 @@ h2 i {
 }
 
 .table tbody tr {
-  transition: all 0.3s ease;
+  transition: none;
 }
 
 .table tbody tr:hover {
   background: rgba(156, 171, 136, 0.05);
-  transform: scale(1.01);
+  transform: none;
 }
 
 .table tbody td {

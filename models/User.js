@@ -19,7 +19,9 @@ const userSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
+    trim: true,
+    lowercase: true
   },
   role: {
     type: String,
@@ -31,6 +33,12 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ['Aktif', 'Tidak Aktif'],
     default: 'Aktif'
+  },
+  resetPasswordTokenHash: {
+    type: String
+  },
+  resetPasswordExpiresAt: {
+    type: Date
   }
 }, {
   timestamps: true

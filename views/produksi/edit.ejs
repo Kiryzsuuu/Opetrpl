@@ -73,12 +73,24 @@
 
       <div class="col-12">
         <label class="form-label">Peralatan (JSON)</label>
-        <textarea name="peralatan" class="form-control" rows="3"><%= Array.isArray(produksi.peralatan) ? JSON.stringify(produksi.peralatan, null, 2) : (produksi.peralatan || '[]') %></textarea>
+        <textarea name="peralatan" class="form-control font-monospace" rows="6" spellcheck="false" autocapitalize="off" autocomplete="off"><%=
+          Array.isArray(produksi.peralatan)
+            ? (produksi.peralatan.length
+              ? JSON.stringify(produksi.peralatan, null, 2)
+              : JSON.stringify([{ namaAlat: '', status: 'OK' }], null, 2))
+            : (String(produksi.peralatan || '').trim() || JSON.stringify([{ namaAlat: '', status: 'OK' }], null, 2))
+        %></textarea>
       </div>
 
       <div class="col-12">
         <label class="form-label">Proses Produksi (JSON)</label>
-        <textarea name="prosesProduksi" class="form-control" rows="4"><%= Array.isArray(produksi.prosesProduksi) ? JSON.stringify(produksi.prosesProduksi, null, 2) : (produksi.prosesProduksi || '[]') %></textarea>
+        <textarea name="prosesProduksi" class="form-control font-monospace" rows="9" spellcheck="false" autocapitalize="off" autocomplete="off"><%=
+          Array.isArray(produksi.prosesProduksi)
+            ? (produksi.prosesProduksi.length
+              ? JSON.stringify(produksi.prosesProduksi, null, 2)
+              : JSON.stringify([{ tahap: '', waktuMulai: '', waktuSelesai: '', pic: '', catatan: '' }], null, 2))
+            : (String(produksi.prosesProduksi || '').trim() || JSON.stringify([{ tahap: '', waktuMulai: '', waktuSelesai: '', pic: '', catatan: '' }], null, 2))
+        %></textarea>
       </div>
 
       <div class="col-12"><label class="form-label">Catatan</label><textarea name="catatan" class="form-control" rows="3"><%= produksi.catatan || '' %></textarea></div>

@@ -77,12 +77,24 @@
 
       <div class="col-12">
         <label class="form-label">Sertifikasi Keamanan (JSON)</label>
-        <textarea name="sertifikasiKeamanan" class="form-control" rows="3"><%= Array.isArray(pengemasan.sertifikasiKeamanan) ? JSON.stringify(pengemasan.sertifikasiKeamanan, null, 2) : (pengemasan.sertifikasiKeamanan || '[]') %></textarea>
+        <textarea name="sertifikasiKeamanan" class="form-control font-monospace" rows="6" spellcheck="false" autocapitalize="off" autocomplete="off"><%=
+          Array.isArray(pengemasan.sertifikasiKeamanan)
+            ? (pengemasan.sertifikasiKeamanan.length
+              ? JSON.stringify(pengemasan.sertifikasiKeamanan, null, 2)
+              : JSON.stringify([{ jenisSertifikat: '', nomorSertifikat: '', tanggalBerlaku: '' }], null, 2))
+            : (String(pengemasan.sertifikasiKeamanan || '').trim() || JSON.stringify([{ jenisSertifikat: '', nomorSertifikat: '', tanggalBerlaku: '' }], null, 2))
+        %></textarea>
       </div>
 
       <div class="col-12">
         <label class="form-label">Audit Trail (JSON)</label>
-        <textarea name="auditTrail" class="form-control" rows="3"><%= Array.isArray(pengemasan.auditTrail) ? JSON.stringify(pengemasan.auditTrail, null, 2) : (pengemasan.auditTrail || '[]') %></textarea>
+        <textarea name="auditTrail" class="form-control font-monospace" rows="7" spellcheck="false" autocapitalize="off" autocomplete="off"><%=
+          Array.isArray(pengemasan.auditTrail)
+            ? (pengemasan.auditTrail.length
+              ? JSON.stringify(pengemasan.auditTrail, null, 2)
+              : JSON.stringify([{ tanggal: '', aktivitas: '', pic: '', hasil: '' }], null, 2))
+            : (String(pengemasan.auditTrail || '').trim() || JSON.stringify([{ tanggal: '', aktivitas: '', pic: '', hasil: '' }], null, 2))
+        %></textarea>
       </div>
 
       <div class="col-12"><label class="form-label">Catatan</label><textarea name="catatan" class="form-control" rows="3"><%= pengemasan.catatan || '' %></textarea></div>

@@ -24,6 +24,6 @@ router.get('/:id/edit', hasRole('Admin', 'Peneliti'), analisisGiziController.edi
 router.put('/:id', hasRole('Admin', 'Peneliti'), analisisGiziController.update);
 
 // Delete analisis gizi (Admin only)
-router.delete('/:id', hasRole('Admin'), analisisGiziController.destroy);
+router.delete('/:id', hasRole('Admin', 'Super Admin'), analisisGiziController.destroy);
 
 module.exports = router;

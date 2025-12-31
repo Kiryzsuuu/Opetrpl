@@ -74,13 +74,26 @@
 
       <div class="col-12">
         <label class="form-label">Sertifikasi Keamanan (JSON)</label>
-        <textarea name="sertifikasiKeamanan" class="form-control" rows="3">[]</textarea>
+        <textarea name="sertifikasiKeamanan" class="form-control font-monospace" rows="6" spellcheck="false" autocapitalize="off" autocomplete="off">[
+  {
+    "jenisSertifikat": "",
+    "nomorSertifikat": "",
+    "tanggalBerlaku": ""
+  }
+]</textarea>
         <div class="form-text">Format: [{"jenisSertifikat":"BPOM","nomorSertifikat":"...","tanggalBerlaku":"2025-01-01"}]</div>
       </div>
 
       <div class="col-12">
         <label class="form-label">Audit Trail (JSON)</label>
-        <textarea name="auditTrail" class="form-control" rows="3">[]</textarea>
+        <textarea name="auditTrail" class="form-control font-monospace" rows="7" spellcheck="false" autocapitalize="off" autocomplete="off">[
+  {
+    "tanggal": "",
+    "aktivitas": "",
+    "pic": "",
+    "hasil": ""
+  }
+]</textarea>
         <div class="form-text">Format: [{"tanggal":"2025-01-01","aktivitas":"QC","pic":"USER_ID","hasil":"OK"}]</div>
       </div>
 

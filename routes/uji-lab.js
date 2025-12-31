@@ -24,6 +24,6 @@ router.get('/:id/edit', hasRole('Admin', 'Peneliti'), ujiLabController.edit);
 router.put('/:id', hasRole('Admin', 'Peneliti'), ujiLabController.update);
 
 // Delete uji lab (Admin only)
-router.delete('/:id', hasRole('Admin'), ujiLabController.destroy);
+router.delete('/:id', hasRole('Admin', 'Super Admin'), ujiLabController.destroy);
 
 module.exports = router;

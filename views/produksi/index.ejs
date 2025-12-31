@@ -69,8 +69,8 @@
                             <div class="btn-group btn-group-sm">
                               <a href="/produksi/<%= item._id %>" class="btn btn-info"><i class="bi bi-eye"></i></a>
                               <a href="/produksi/<%= item._id %>/edit" class="btn btn-warning"><i class="bi bi-pencil"></i></a>
-                              <form action="/produksi/<%= item._id %>?_method=DELETE" method="POST" class="d-inline">
-                                <button type="submit" class="btn btn-danger" onclick="return confirm('Yakin ingin menghapus?')"><i class="bi bi-trash"></i></button>
+                              <form action="/produksi/<%= item._id %>?_method=DELETE" method="POST" class="d-inline" data-confirm="Yakin ingin menghapus?" data-confirm-btn-class="btn-danger" data-confirm-ok-text="Hapus">
+                                <button type="submit" class="btn btn-danger"><i class="bi bi-trash"></i></button>
                               </form>
                             </div>
                           </td>

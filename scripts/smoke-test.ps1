@@ -1,6 +1,9 @@
 $ErrorActionPreference = 'Stop'
 
 $base = 'http://localhost:3001'
+if ($env:SMOKE_BASE) {
+  $base = $env:SMOKE_BASE
+}
 
 function Print($msg) {
   Write-Host $msg
@@ -45,19 +48,8 @@ $session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
 $null = Invoke-WebRequest -Uri "$base/login" -WebSession $session -UseBasicParsing
 
 $body = @{ email = 'maskiryz23@gmail.com'; password = 'admin123' }
-try {
-  $loginPost = Invoke-WebRequest -Uri "$base/login" -Method POST -Body $body -WebSession $session -MaximumRedirection 0 -UseBasicParsing
-  Print "Login POST: status=$($loginPost.StatusCode)"
-} catch {
-  # Express typically redirects; PowerShell throws on 302 with MaxRedirection 0
-  if ($_.Exception.Response -and $_.Exception.Response.StatusCode) {
-    $status = [int]$_.Exception.Response.StatusCode
-    $loc = $_.Exception.Response.Headers['Location']
-    Print "Login POST: status=$status location=$loc"
-  } else {
-    throw
-  }
-}
+$loginPost = Invoke-WebRequest -Uri "$base/login" -Method POST -Body $body -WebSession $session -UseBasicParsing
+Print "Login POST: status=$($loginPost.StatusCode)"
 
 # Follow dashboard
 $dash = Get-PageNoThrow '/dashboard' $session

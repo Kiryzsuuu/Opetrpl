@@ -70,13 +70,26 @@
 
       <div class="col-12">
         <label class="form-label">Peralatan (JSON)</label>
-        <textarea name="peralatan" class="form-control" rows="3">[]</textarea>
+        <textarea name="peralatan" class="form-control font-monospace" rows="6" spellcheck="false" autocapitalize="off" autocomplete="off">[
+  {
+    "namaAlat": "",
+    "status": "OK"
+  }
+]</textarea>
         <div class="form-text">Format: [{"namaAlat":"Mixer","status":"OK"}]</div>
       </div>
 
       <div class="col-12">
         <label class="form-label">Proses Produksi (JSON)</label>
-        <textarea name="prosesProduksi" class="form-control" rows="4">[]</textarea>
+        <textarea name="prosesProduksi" class="form-control font-monospace" rows="9" spellcheck="false" autocapitalize="off" autocomplete="off">[
+  {
+    "tahap": "",
+    "waktuMulai": "",
+    "waktuSelesai": "",
+    "pic": "",
+    "catatan": ""
+  }
+]</textarea>
         <div class="form-text">Format: [{"tahap":"Mixing","waktuMulai":"2025-01-01T08:00:00Z","waktuSelesai":"2025-01-01T09:00:00Z","pic":"Nama","catatan":"..."}]</div>
       </div>
 

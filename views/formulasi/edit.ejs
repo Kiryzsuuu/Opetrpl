@@ -56,9 +56,46 @@
       </div>
 
       <div class="col-12">
-        <label class="form-label">Komposisi (JSON)</label>
-        <textarea name="komposisi" id="komposisi" class="form-control" rows="5"></textarea>
-        <div class="form-text">Format: [{"komoditas":"<id>","jumlah":1,"satuan":"kg"}]</div>
+        <label class="form-label">Komposisi</label>
+        <div class="row g-2 align-items-end">
+          <div class="col-md-6">
+            <label class="form-label small text-muted">Komoditas</label>
+            <select id="komoditasId" class="form-select">
+              <option value="">-- pilih komoditas --</option>
+              <% (komoditas || []).forEach((k) => { %>
+                <option value="<%= k._id %>"><%= k.kode %> - <%= k.nama %></option>
+              <% }) %>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small text-muted">Jumlah</label>
+            <input id="komoditasJumlah" type="number" class="form-control" min="0" step="0.01" />
+          </div>
+          <div class="col-md-3">
+            <label class="form-label small text-muted">Satuan</label>
+            <input id="komoditasSatuan" class="form-control" placeholder="kg" />
+          </div>
+          <div class="col-12">
+            <button type="button" class="btn btn-primary btn-sm" id="btnTambahKomposisi">
+              <i class="bi bi-plus"></i> Tambah ke Komposisi
+            </button>
+          </div>
+        </div>
+
+        <div class="mt-3">
+          <label class="form-label small text-muted">Komposisi (JSON) - otomatis terisi saat tombol "Tambah" dipakai</label>
+          <textarea
+            name="komposisi"
+            id="komposisi"
+            class="form-control font-monospace"
+            rows="7"
+            readonly
+            spellcheck="false"
+            autocapitalize="off"
+            autocomplete="off"
+          ></textarea>
+          <div class="form-text">Format tersimpan: [{"komoditas":"&lt;id&gt;","jumlah":1,"satuan":"kg"}]</div>
+        </div>
       </div>
     </div>
   </div>
@@ -79,13 +116,42 @@
   (function () {
     const el = document.getElementById('komposisi');
     const dataEl = document.getElementById('komposisiData');
+    const btn = document.getElementById('btnTambahKomposisi');
+    const idEl = document.getElementById('komoditasId');
+    const jumlahEl = document.getElementById('komoditasJumlah');
+    const satuanEl = document.getElementById('komoditasSatuan');
     if (!el || !dataEl) return;
+
+    function parseJsonArray(text) {
+      try {
+        const v = JSON.parse(text || '[]');
+        return Array.isArray(v) ? v : [];
+      } catch {
+        return [];
+      }
+    }
+
     try {
       const data = JSON.parse(dataEl.textContent || '[]');
-      el.value = JSON.stringify(data);
+      el.value = JSON.stringify(data, null, 2);
     } catch {
-      el.value = '[]';
+      el.value = '';
     }
+
+    btn?.addEventListener('click', function () {
+      const komoditas = idEl.value;
+      const jumlah = Number(jumlahEl.value || 0);
+      const satuan = (satuanEl.value || '').trim();
+      if (!komoditas || !jumlah) return;
+
+      const arr = parseJsonArray(el.value);
+      arr.push({ komoditas, jumlah, satuan: satuan || undefined });
+      el.value = JSON.stringify(arr, null, 2);
+
+      idEl.value = '';
+      jumlahEl.value = '';
+      satuanEl.value = '';
+    });
   })();
 </script>
 

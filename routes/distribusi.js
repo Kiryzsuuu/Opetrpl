@@ -24,6 +24,6 @@ router.get('/:id/edit', hasRole('Admin', 'Petugas Lapangan'), distribusiControll
 router.put('/:id', hasRole('Admin', 'Petugas Lapangan'), distribusiController.update);
 
 // Delete distribusi (Admin only)
-router.delete('/:id', hasRole('Admin'), distribusiController.destroy);
+router.delete('/:id', hasRole('Admin', 'Super Admin'), distribusiController.destroy);
 
 module.exports = router;

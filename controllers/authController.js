@@ -1,4 +1,28 @@
 const User = require('../models/User');
+const crypto = require('crypto');
+const { sendPasswordResetEmail } = require('../config/mailer');
+
+function normalizeEmail(email) {
+  return String(email || '').trim().toLowerCase();
+}
+
+async function generateUniqueUsernameFromEmail(email) {
+  const localPart = normalizeEmail(email).split('@')[0] || 'user';
+  const base = localPart.replace(/[^a-z0-9._-]/gi, '').slice(0, 20) || 'user';
+  let candidate = base;
+  let attempt = 0;
+
+  while (await User.exists({ username: candidate })) {
+    attempt += 1;
+    candidate = `${base}${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`;
+    if (attempt >= 10) {
+      candidate = `${base}${Date.now()}`.slice(0, 30);
+      break;
+    }
+  }
+
+  return candidate;
+}
 
 class AuthController {
   // Tampilkan halaman login
@@ -22,19 +46,20 @@ class AuthController {
   // Proses login
   async login(req, res) {
     try {
-      const { username, password } = req.body;
-      
-      const user = await User.findOne({ username, status: 'Aktif' });
+      const { email, password } = req.body;
+      const normalizedEmail = normalizeEmail(email);
+
+      const user = await User.findOne({ email: normalizedEmail, status: 'Aktif' });
       
       if (!user) {
-        req.flash('error', 'Username atau password salah');
+        req.flash('error', 'Email atau password salah');
         return res.redirect('/login');
       }
 
     const isMatch = await user.comparePassword(password);
     
     if (!isMatch) {
-      req.flash('error', 'Username atau password salah');
+      req.flash('error', 'Email atau password salah');
       return res.redirect('/login');
     }
 
@@ -62,7 +87,8 @@ class AuthController {
   // Proses register
   async register(req, res) {
     try {
-      const { username, email, password, confirmPassword, nama, noTelepon } = req.body;
+      const { email, password, confirmPassword, nama, noTelepon } = req.body;
+      const normalizedEmail = normalizeEmail(email);
 
       // Validasi password match
       if (password !== confirmPassword) {
@@ -70,24 +96,19 @@ class AuthController {
         return res.redirect('/register');
       }
 
-      // Cek apakah username sudah ada
-      const existingUsername = await User.findOne({ username });
-      if (existingUsername) {
-        req.flash('error', 'Username sudah digunakan');
-        return res.redirect('/register');
-      }
-
       // Cek apakah email sudah ada
-      const existingEmail = await User.findOne({ email });
+      const existingEmail = await User.findOne({ email: normalizedEmail });
       if (existingEmail) {
         req.flash('error', 'Email sudah terdaftar');
         return res.redirect('/register');
       }
 
+      const username = await generateUniqueUsernameFromEmail(normalizedEmail);
+
       // Buat user baru dengan role default "Petugas Lapangan"
       const newUser = new User({
         username,
-        email,
+        email: normalizedEmail,
         password,
         nama,
         noTelepon,
@@ -103,6 +124,100 @@ class AuthController {
       console.error(err);
       req.flash('error', 'Terjadi kesalahan saat registrasi');
       res.redirect('/register');
+    }
+  }
+
+  // Tampilkan halaman forgot password
+  async showForgotPassword(req, res) {
+    res.render('auth/forgot-password', {
+      title: 'Lupa Password',
+      success: req.flash('success'),
+      error: req.flash('error')
+    });
+  }
+
+  // Proses forgot password (kirim email)
+  async forgotPassword(req, res) {
+    try {
+      const { email } = req.body;
+      const normalizedEmail = normalizeEmail(email);
+
+      const user = await User.findOne({ email: normalizedEmail });
+
+      // Jangan bocorkan apakah email terdaftar atau tidak
+      const successMessage = 'Jika email terdaftar, link reset password akan dikirim.';
+
+      if (!user) {
+        req.flash('success', successMessage);
+        return res.redirect('/forgot-password');
+      }
+
+      const token = crypto.randomBytes(32).toString('hex');
+      const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
+      user.resetPasswordTokenHash = tokenHash;
+      user.resetPasswordExpiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 jam
+      await user.save();
+
+      await sendPasswordResetEmail({
+        to: user.email,
+        token
+      });
+
+      req.flash('success', successMessage);
+      res.redirect('/forgot-password');
+    } catch (err) {
+      console.error(err);
+      req.flash('error', 'Gagal mengirim email reset password. Coba lagi nanti.');
+      res.redirect('/forgot-password');
+    }
+  }
+
+  // Tampilkan halaman reset password
+  async showResetPassword(req, res) {
+    const { token } = req.params;
+    res.render('auth/reset-password', {
+      title: 'Reset Password',
+      token,
+      success: req.flash('success'),
+      error: req.flash('error')
+    });
+  }
+
+  // Proses reset password
+  async resetPassword(req, res) {
+    try {
+      const { token } = req.params;
+      const { password, confirmPassword } = req.body;
+
+      if (password !== confirmPassword) {
+        req.flash('error', 'Password dan Konfirmasi Password tidak sama');
+        return res.redirect(`/reset-password/${token}`);
+      }
+
+      const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
+      const user = await User.findOne({
+        resetPasswordTokenHash: tokenHash,
+        resetPasswordExpiresAt: { $gt: new Date() }
+      });
+
+      if (!user) {
+        req.flash('error', 'Link reset password tidak valid atau sudah kadaluarsa.');
+        return res.redirect('/forgot-password');
+      }
+
+      user.password = password;
+      user.resetPasswordTokenHash = undefined;
+      user.resetPasswordExpiresAt = undefined;
+      await user.save();
+
+      req.flash('success', 'Password berhasil direset. Silakan login.');
+      res.redirect('/login');
+    } catch (err) {
+      console.error(err);
+      req.flash('error', 'Terjadi kesalahan saat reset password');
+      res.redirect('/forgot-password');
     }
   }
 

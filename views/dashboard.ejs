@@ -144,7 +144,7 @@
                   Gunakan menu navigasi di sebelah kiri untuk mengakses fitur yang tersedia.
                 </p>
                 
-                <% if (user.role === 'Admin') { %>
+                <% if (user.role === 'Admin' || user.role === 'Super Admin') { %>
                   <div class="mt-3">
                     <h6>Quick Actions:</h6>
                     <a href="/komoditas/new" class="btn btn-sm btn-primary me-2">

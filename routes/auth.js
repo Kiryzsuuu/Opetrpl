@@ -11,6 +11,12 @@ router.post('/login', authController.login);
 router.get('/register', authController.showRegister);
 router.post('/register', authController.register);
 
+// Forgot / Reset password
+router.get('/forgot-password', authController.showForgotPassword);
+router.post('/forgot-password', authController.forgotPassword);
+router.get('/reset-password/:token', authController.showResetPassword);
+router.post('/reset-password/:token', authController.resetPassword);
+
 // Logout
 router.get('/logout', authController.logout);
 

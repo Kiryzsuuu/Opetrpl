@@ -20,7 +20,7 @@
       <main class="col-md-10 ms-sm-auto col-lg-10 px-md-4">
         <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
           <h1 class="h2"><%= title %></h1>
-          <% if (user.role === 'Admin') { %>
+          <% if (user.role === 'Admin' || user.role === 'Super Admin') { %>
             <a href="/komoditas/new" class="btn btn-primary">
               <i class="bi bi-plus"></i> Tambah Komoditas
             </a>
@@ -70,11 +70,11 @@
                       <a href="/komoditas/<%= k._id %>" class="btn btn-sm btn-info">
                         <i class="bi bi-eye"></i>
                       </a>
-                      <% if (user.role === 'Admin') { %>
+                      <% if (user.role === 'Admin' || user.role === 'Super Admin') { %>
                         <a href="/komoditas/<%= k._id %>/edit" class="btn btn-sm btn-warning">
                           <i class="bi bi-pencil"></i>
                         </a>
-                        <form action="/komoditas/<%= k._id %>?_method=DELETE" method="POST" style="display:inline;" onsubmit="return confirm('Yakin ingin menghapus?')">
+                        <form action="/komoditas/<%= k._id %>?_method=DELETE" method="POST" style="display:inline;" data-confirm="Yakin ingin menghapus?" data-confirm-btn-class="btn-danger" data-confirm-ok-text="Hapus">
                           <button type="submit" class="btn btn-sm btn-danger">
                             <i class="bi bi-trash"></i>
                           </button>

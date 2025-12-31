@@ -77,7 +77,7 @@
             <input id="komoditasSatuan" class="form-control" placeholder="kg" />
           </div>
           <div class="col-12">
-            <button type="button" class="btn btn-outline-primary btn-sm" id="btnTambahKomposisi">
+            <button type="button" class="btn btn-primary btn-sm" id="btnTambahKomposisi">
               <i class="bi bi-plus"></i> Tambah ke Komposisi
             </button>
           </div>
@@ -85,8 +85,18 @@
 
         <div class="mt-3">
           <label class="form-label small text-muted">Komposisi (JSON) - otomatis terisi saat tombol "Tambah" dipakai</label>
-          <textarea name="komposisi" id="komposisi" class="form-control" rows="4">[]</textarea>
-          <div class="form-text">Format: [{"komoditas":"<id>","jumlah":1,"satuan":"kg"}]</div>
+          <textarea
+            name="komposisi"
+            id="komposisi"
+            class="form-control font-monospace"
+            rows="5"
+            readonly
+            placeholder='Klik "Tambah ke Komposisi" untuk menambahkan item'
+            spellcheck="false"
+            autocapitalize="off"
+            autocomplete="off"
+          ></textarea>
+          <div class="form-text">Format tersimpan: [{"komoditas":"&lt;id&gt;","jumlah":1,"satuan":"kg"}]</div>
         </div>
       </div>
     </div>
@@ -123,7 +133,7 @@
 
       const arr = parseJsonArray(komposisiEl.value);
       arr.push({ komoditas, jumlah, satuan: satuan || undefined });
-      komposisiEl.value = JSON.stringify(arr);
+      komposisiEl.value = JSON.stringify(arr, null, 2);
 
       idEl.value = '';
       jumlahEl.value = '';

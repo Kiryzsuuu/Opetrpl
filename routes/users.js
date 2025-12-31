@@ -27,4 +27,8 @@ router.delete('/:id', userController.destroy);
 // Toggle status
 router.post('/:id/toggle-status', userController.toggleStatus);
 
+// Explicit actions
+router.post('/:id/set-status', userController.setStatus);
+router.post('/:id/set-role', userController.setRole);
+
 module.exports = router;

@@ -50,17 +50,29 @@ URL: `http://localhost:3000`
 
 ### Default Accounts
 
+Login menggunakan **email**.
+
 **Admin**
-- Username: admin
+- Email: admin@sistem.com
 - Password: admin123
 
 **Peneliti**
-- Username: peneliti
+- Email: peneliti@sistem.com
 - Password: peneliti123
 
 **Petugas Lapangan**
-- Username: petugas
+- Email: petugas@sistem.com
 - Password: petugas123
+
+## Forgot Password (Email)
+
+Fitur lupa password mengirim link reset via email. Tambahkan env berikut pada file `.env` (lihat `.env.example`):
+
+- `GMAIL_USER`
+- `GMAIL_APP_PASSWORD`
+- `APP_BASE_URL` (opsional)
+- `APP_NAME` (opsional)
+- `MAIL_FROM` (opsional)
 
 ## Struktur Project
 

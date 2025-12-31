@@ -91,7 +91,7 @@
     <div class="card">
       <div class="card-body">
         <h5 class="mb-3">Aksi</h5>
-        <form action="/pengemasan/<%= pengemasan._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Hapus data pengemasan ini?')">
+        <form action="/pengemasan/<%= pengemasan._id %>?_method=DELETE" method="POST" data-confirm="Hapus data pengemasan ini?" data-confirm-btn-class="btn-danger" data-confirm-ok-text="Hapus">
           <button class="btn btn-danger w-100" type="submit"><i class="bi bi-trash"></i> Hapus</button>
         </form>
       </div>

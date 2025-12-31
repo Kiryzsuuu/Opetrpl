@@ -13,17 +13,17 @@ router.get('/', pengemasanController.index);
 router.get('/export/csv', pengemasanController.exportCsv);
 
 // Create pengemasan (Admin only)
-router.get('/new', hasRole('Admin'), pengemasanController.create);
-router.post('/', hasRole('Admin'), pengemasanController.store);
+router.get('/new', hasRole('Admin', 'Super Admin'), pengemasanController.create);
+router.post('/', hasRole('Admin', 'Super Admin'), pengemasanController.store);
 
 // Show pengemasan
 router.get('/:id', pengemasanController.show);
 
 // Edit pengemasan (Admin only)
-router.get('/:id/edit', hasRole('Admin'), pengemasanController.edit);
-router.put('/:id', hasRole('Admin'), pengemasanController.update);
+router.get('/:id/edit', hasRole('Admin', 'Super Admin'), pengemasanController.edit);
+router.put('/:id', hasRole('Admin', 'Super Admin'), pengemasanController.update);
 
 // Delete pengemasan (Admin only)
-router.delete('/:id', hasRole('Admin'), pengemasanController.destroy);
+router.delete('/:id', hasRole('Admin', 'Super Admin'), pengemasanController.destroy);
 
 module.exports = router;

@@ -24,6 +24,6 @@ router.get('/:id/edit', hasRole('Admin', 'Peneliti'), formulasiController.edit);
 router.put('/:id', hasRole('Admin', 'Peneliti'), formulasiController.update);
 
 // Delete formulasi (Admin only)
-router.delete('/:id', hasRole('Admin'), formulasiController.destroy);
+router.delete('/:id', hasRole('Admin', 'Super Admin'), formulasiController.destroy);
 
 module.exports = router;

@@ -13,17 +13,17 @@ router.get('/', produksiController.index);
 router.get('/export/csv', produksiController.exportCsv);
 
 // Create produksi (Admin only)
-router.get('/new', hasRole('Admin'), produksiController.create);
-router.post('/', hasRole('Admin'), produksiController.store);
+router.get('/new', hasRole('Admin', 'Super Admin'), produksiController.create);
+router.post('/', hasRole('Admin', 'Super Admin'), produksiController.store);
 
 // Show produksi
 router.get('/:id', produksiController.show);
 
 // Edit produksi (Admin only)
-router.get('/:id/edit', hasRole('Admin'), produksiController.edit);
-router.put('/:id', hasRole('Admin'), produksiController.update);
+router.get('/:id/edit', hasRole('Admin', 'Super Admin'), produksiController.edit);
+router.put('/:id', hasRole('Admin', 'Super Admin'), produksiController.update);
 
 // Delete produksi (Admin only)
-router.delete('/:id', hasRole('Admin'), produksiController.destroy);
+router.delete('/:id', hasRole('Admin', 'Super Admin'), produksiController.destroy);
 
 module.exports = router;
