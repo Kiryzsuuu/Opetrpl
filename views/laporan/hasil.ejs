@@ -1,0 +1,201 @@
+<%- include('../partials/page-start', { title }) %>
+
+<div class="d-flex justify-content-between align-items-center mb-4 page-animate">
+  <div>
+    <h2 class="mb-1"><i class="bi bi-file-earmark-text"></i> <%= title %></h2>
+    <div class="text-secondary small">
+      Jenis: <strong><%= jenisLaporan %></strong>
+      <% if (tanggalMulai && tanggalAkhir) { %>
+        • Periode: <%= tanggalMulai %> s/d <%= tanggalAkhir %>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-success" href="/laporan/export/excel?jenisLaporan=<%= encodeURIComponent(jenisLaporan) %><% if (tanggalMulai) { %>&tanggalMulai=<%= encodeURIComponent(tanggalMulai) %><% } %><% if (tanggalAkhir) { %>&tanggalAkhir=<%= encodeURIComponent(tanggalAkhir) %><% } %>">
+      <i class="bi bi-file-excel"></i> Export Excel
+    </a>
+    <a href="/laporan" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Kembali</a>
+  </div>
+</div>
+
+<%- include('../partials/flash') %>
+
+<% if (jenisLaporan === 'ringkasan') { %>
+  <div class="row g-3">
+    <div class="col-md-4"><div class="card"><div class="card-body"><div class="text-secondary small">Komoditas</div><div class="fs-3 fw-bold"><%= data.totalKomoditas || 0 %></div></div></div></div>
+    <div class="col-md-4"><div class="card"><div class="card-body"><div class="text-secondary small">Formulasi</div><div class="fs-3 fw-bold"><%= data.totalFormulasi || 0 %></div></div></div></div>
+    <div class="col-md-4"><div class="card"><div class="card-body"><div class="text-secondary small">Produksi</div><div class="fs-3 fw-bold"><%= data.totalProduksi || 0 %></div></div></div></div>
+    <div class="col-md-4"><div class="card"><div class="card-body"><div class="text-secondary small">Distribusi</div><div class="fs-3 fw-bold"><%= data.totalDistribusi || 0 %></div></div></div></div>
+  </div>
+
+  <div class="card mt-3">
+    <div class="card-body">
+      <h5 class="card-title">Produksi per Status</h5>
+      <% if (Array.isArray(data.produksiPerStatus) && data.produksiPerStatus.length) { %>
+        <ul class="mb-0">
+          <% data.produksiPerStatus.forEach((s) => { %>
+            <li><%= s._id || '-' %>: <strong><%= s.count %></strong></li>
+          <% }) %>
+        </ul>
+      <% } else { %>
+        <div class="text-secondary">Tidak ada data.</div>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="card mt-3">
+    <div class="card-body">
+      <h5 class="card-title">Distribusi per Status</h5>
+      <% if (Array.isArray(data.distribusiPerStatus) && data.distribusiPerStatus.length) { %>
+        <ul class="mb-0">
+          <% data.distribusiPerStatus.forEach((s) => { %>
+            <li><%= s._id || '-' %>: <strong><%= s.count %></strong></li>
+          <% }) %>
+        </ul>
+      <% } else { %>
+        <div class="text-secondary">Tidak ada data.</div>
+      <% } %>
+    </div>
+  </div>
+
+<% } else if (jenisLaporan === 'komoditas') { %>
+  <div class="card">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-striped">
+          <thead><tr><th>Nama</th><th>Kategori</th><th>Stok</th><th>Satuan</th><th>Tanggal</th></tr></thead>
+          <tbody>
+            <% (data.komoditas || []).forEach((k) => { %>
+              <tr>
+                <td><%= k.nama || '-' %></td>
+                <td><%= k.kategori || '-' %></td>
+                <td><%= (k.stok ?? '-') %></td>
+                <td><%= k.satuan || '-' %></td>
+                <td><%= k.createdAt ? new Date(k.createdAt).toLocaleDateString('id-ID') : '-' %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+<% } else if (jenisLaporan === 'formulasi') { %>
+  <div class="card">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-striped">
+          <thead><tr><th>Kode</th><th>Nama</th><th>Status</th><th>Versi</th><th>Tanggal</th></tr></thead>
+          <tbody>
+            <% (data.formulasi || []).forEach((f) => { %>
+              <tr>
+                <td><%= f.kode || '-' %></td>
+                <td><%= f.nama || '-' %></td>
+                <td><%= f.status || '-' %></td>
+                <td><%= f.versi || '-' %></td>
+                <td><%= f.createdAt ? new Date(f.createdAt).toLocaleDateString('id-ID') : '-' %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+<% } else if (jenisLaporan === 'produksi') { %>
+  <div class="card">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-striped">
+          <thead><tr><th>Batch</th><th>Formulasi</th><th>Tanggal</th><th>Jumlah</th><th>Status</th></tr></thead>
+          <tbody>
+            <% (data.produksi || []).forEach((p) => { %>
+              <tr>
+                <td><%= p.batch || '-' %></td>
+                <td><%= p.formulasi?.kode ? (p.formulasi.kode + ' - ' + p.formulasi.nama) : '-' %></td>
+                <td><%= p.tanggalProduksi ? new Date(p.tanggalProduksi).toLocaleDateString('id-ID') : '-' %></td>
+                <td><%= (p.jumlahProduksi ?? '-') %> <%= p.unit || '' %></td>
+                <td><%= p.status || '-' %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+<% } else if (jenisLaporan === 'distribusi') { %>
+  <div class="card">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-striped">
+          <thead><tr><th>Tujuan</th><th>Tanggal</th><th>Jumlah</th><th>Ekspedisi</th><th>Status</th></tr></thead>
+          <tbody>
+            <% (data.distribusi || []).forEach((d) => { %>
+              <tr>
+                <td><%= d.tujuan || '-' %></td>
+                <td><%= d.tanggalDistribusi ? new Date(d.tanggalDistribusi).toLocaleDateString('id-ID') : '-' %></td>
+                <td><%= d.jumlah ?? '-' %></td>
+                <td><%= d.ekspedisi || '-' %></td>
+                <td><%= d.status || '-' %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+<% } else if (jenisLaporan === 'analisis-gizi') { %>
+  <div class="card">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-striped">
+          <thead><tr><th>Formulasi</th><th>Kalori</th><th>Protein</th><th>Lemak</th><th>Karbohidrat</th><th>Tanggal</th></tr></thead>
+          <tbody>
+            <% (data.analisisGizi || []).forEach((a) => { %>
+              <tr>
+                <td><%= a.formulasi?.kode ? (a.formulasi.kode + ' - ' + a.formulasi.nama) : '-' %></td>
+                <td><%= a.kalori ?? '-' %></td>
+                <td><%= a.protein ?? '-' %></td>
+                <td><%= a.lemak ?? '-' %></td>
+                <td><%= a.karbohidrat ?? '-' %></td>
+                <td><%= a.createdAt ? new Date(a.createdAt).toLocaleDateString('id-ID') : '-' %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+<% } else if (jenisLaporan === 'uji-lab') { %>
+  <div class="card">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-striped">
+          <thead><tr><th>Kode Uji</th><th>Formulasi</th><th>Jenis</th><th>Tanggal</th><th>Hasil</th><th>Lab</th></tr></thead>
+          <tbody>
+            <% (data.ujiLab || []).forEach((u) => { %>
+              <tr>
+                <td><%= u.kodeUji || '-' %></td>
+                <td><%= u.formulasi?.kode ? (u.formulasi.kode + ' - ' + u.formulasi.nama) : '-' %></td>
+                <td><%= u.jenisUji || '-' %></td>
+                <td><%= u.tanggalUji ? new Date(u.tanggalUji).toLocaleDateString('id-ID') : '-' %></td>
+                <td><%= u.hasilUji || '-' %></td>
+                <td><%= u.laboratorium || '-' %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+<% } else { %>
+  <div class="alert alert-warning">Tampilan laporan untuk jenis ini belum tersedia.</div>
+  <pre class="bg-light p-3 rounded"><%= JSON.stringify(data || {}, null, 2) %></pre>
+<% } %>
+
+<%- include('../partials/page-end') %>

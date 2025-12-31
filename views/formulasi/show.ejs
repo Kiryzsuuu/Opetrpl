@@ -1,0 +1,90 @@
+<%- include('../partials/page-start', { title }) %>
+
+<div class="d-flex justify-content-between align-items-center mb-4 page-animate">
+  <h2><i class="bi bi-eye"></i> Detail Formulasi</h2>
+  <div class="d-flex gap-2">
+    <a href="/formulasi" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Kembali</a>
+    <a href="/formulasi/<%= formulasi._id %>/edit" class="btn btn-warning"><i class="bi bi-pencil"></i> Edit</a>
+  </div>
+</div>
+
+<%- include('../partials/flash') %>
+
+<div class="card mb-4">
+  <div class="card-body">
+    <div class="row g-3">
+      <div class="col-md-4"><strong>Kode:</strong> <%= formulasi.kode %></div>
+      <div class="col-md-8"><strong>Nama:</strong> <%= formulasi.nama %></div>
+      <div class="col-md-6"><strong>Kategori:</strong> <%= formulasi.kategoriProduk %></div>
+      <div class="col-md-6"><strong>Status:</strong> <span class="badge bg-secondary"><%= formulasi.status %></span></div>
+      <div class="col-12"><strong>Deskripsi:</strong><br><%= formulasi.deskripsi || '-' %></div>
+      <div class="col-12"><strong>Cara Produksi:</strong><br><pre class="mb-0"><%= formulasi.caraProduksi || '-' %></pre></div>
+    </div>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <div class="card-header"><i class="bi bi-list-ul"></i> Komposisi</div>
+  <div class="card-body">
+    <% if (!formulasi.komposisi || formulasi.komposisi.length === 0) { %>
+      <div class="alert alert-info mb-0">Belum ada komposisi.</div>
+    <% } else { %>
+      <div class="table-responsive">
+        <table class="table table-sm table-hover">
+          <thead>
+            <tr>
+              <th>Komoditas</th>
+              <th>Jumlah</th>
+              <th>Satuan</th>
+              <th>Persentase</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% formulasi.komposisi.forEach((k) => { %>
+              <tr>
+                <td><%= k.komoditas && k.komoditas.nama ? k.komoditas.nama : '-' %></td>
+                <td><%= k.jumlah != null ? k.jumlah : '-' %></td>
+                <td><%= k.satuan || '-' %></td>
+                <td><%= k.persentase != null ? k.persentase : '-' %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><i class="bi bi-link-45deg"></i> Data Terkait</div>
+  <div class="card-body">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <h6>Analisis Gizi</h6>
+        <% if (!analisisGizi || analisisGizi.length === 0) { %>
+          <div class="text-muted">Belum ada.</div>
+        <% } else { %>
+          <ul class="mb-0">
+            <% analisisGizi.forEach((a) => { %>
+              <li><a href="/analisis-gizi/<%= a._id %>"><%= a.status %></a> - <%= a.tanggalAnalisis ? new Date(a.tanggalAnalisis).toLocaleDateString('id-ID') : '-' %></li>
+            <% }) %>
+          </ul>
+        <% } %>
+      </div>
+      <div class="col-md-6">
+        <h6>Uji Laboratorium</h6>
+        <% if (!ujiLab || ujiLab.length === 0) { %>
+          <div class="text-muted">Belum ada.</div>
+        <% } else { %>
+          <ul class="mb-0">
+            <% ujiLab.forEach((u) => { %>
+              <li><a href="/uji-lab/<%= u._id %>"><%= u.jenisUji %></a> - <%= u.hasilUji %></li>
+            <% }) %>
+          </ul>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/page-end') %>

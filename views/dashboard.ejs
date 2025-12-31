@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <%- include('partials/navbar') %>
+  
+  <div class="container-fluid">
+    <div class="row">
+      <nav class="col-md-2 col-lg-2 d-md-block bg-light sidebar">
+        <%- include('partials/sidebar') %>
+      </nav>
+      
+      <main class="col-md-10 ms-sm-auto col-lg-10 px-md-4">
+        <div class="pt-3 pb-2 mb-3 border-bottom">
+          <h1 class="h2"><%= title %></h1>
+        </div>
+        
+        <div class="row">
+          <% if (user.role === 'Super Admin') { %>
+            <div class="col-md-3 mb-3">
+              <div class="card text-white bg-danger">
+                <div class="card-body">
+                  <h5 class="card-title"><i class="bi bi-people"></i> Total User</h5>
+                  <h2><%= stats.totalUser || 0 %></h2>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3 mb-3">
+              <div class="card text-white bg-success">
+                <div class="card-body">
+                  <h5 class="card-title"><i class="bi bi-box-seam"></i> Komoditas</h5>
+                  <h2><%= stats.totalKomoditas || 0 %></h2>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3 mb-3">
+              <div class="card text-white bg-info">
+                <div class="card-body">
+                  <h5 class="card-title"><i class="bi bi-clipboard-data"></i> Formulasi</h5>
+                  <h2><%= stats.totalFormulasi || 0 %></h2>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3 mb-3">
+              <div class="card text-white bg-warning">
+                <div class="card-body">
+                  <h5 class="card-title"><i class="bi bi-gear"></i> Produksi</h5>
+                  <h2><%= stats.totalProduksi || 0 %></h2>
+                </div>
+              </div>
+            </div>
+          <% } else if (user.role === 'Admin') { %>
+            <div class="col-md-3 mb-3">
+              <div class="card text-white bg-primary">
+                <div class="card-body">
+                  <h5 class="card-title"><i class="bi bi-people"></i> Total User</h5>
+                  <h2><%= stats.totalUser || 0 %></h2>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3 mb-3">
+              <div class="card text-white bg-success">
+                <div class="card-body">
+                  <h5 class="card-title"><i class="bi bi-box-seam"></i> Komoditas</h5>
+                  <h2><%= stats.totalKomoditas || 0 %></h2>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3 mb-3">
+              <div class="card text-white bg-info">
+                <div class="card-body">
+                  <h5 class="card-title"><i class="bi bi-clipboard-data"></i> Formulasi</h5>
+                  <h2><%= stats.totalFormulasi || 0 %></h2>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3 mb-3">
+              <div class="card text-white bg-warning">
+                <div class="card-body">
+                  <h5 class="card-title"><i class="bi bi-gear"></i> Produksi</h5>
+                  <h2><%= stats.totalProduksi || 0 %></h2>
+                </div>
+              </div>
+            </div>
+          <% } else if (user.role === 'Peneliti') { %>
+            <div class="col-md-4 mb-3">
+              <div class="card text-white bg-info">
+                <div class="card-body">
+                  <h5 class="card-title"><i class="bi bi-clipboard-data"></i> Formulasi Saya</h5>
+                  <h2><%= stats.totalFormulasi || 0 %></h2>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4 mb-3">
+              <div class="card text-white bg-success">
+                <div class="card-body">
+                  <h5 class="card-title"><i class="bi bi-graph-up"></i> Analisis Gizi</h5>
+                  <h2><%= stats.totalAnalisis || 0 %></h2>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4 mb-3">
+              <div class="card text-white bg-warning">
+                <div class="card-body">
+                  <h5 class="card-title"><i class="bi bi-flask"></i> Uji Lab</h5>
+                  <h2><%= stats.totalUjiLab || 0 %></h2>
+                </div>
+              </div>
+            </div>
+          <% } else if (user.role === 'Petugas Lapangan') { %>
+            <div class="col-md-6 mb-3">
+              <div class="card text-white bg-primary">
+                <div class="card-body">
+                  <h5 class="card-title"><i class="bi bi-truck"></i> Total Distribusi</h5>
+                  <h2><%= stats.totalDistribusi || 0 %></h2>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <div class="card text-white bg-warning">
+                <div class="card-body">
+                  <h5 class="card-title"><i class="bi bi-hourglass-split"></i> Dalam Perjalanan</h5>
+                  <h2><%= stats.dalamPerjalanan || 0 %></h2>
+                </div>
+              </div>
+            </div>
+          <% } %>
+        </div>
+        
+        <div class="row mt-4">
+          <div class="col-md-12">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">Selamat Datang, <%= user.nama %>!</h5>
+                <p class="card-text">
+                  Anda login sebagai <strong><%= user.role %></strong>. 
+                  Gunakan menu navigasi di sebelah kiri untuk mengakses fitur yang tersedia.
+                </p>
+                
+                <% if (user.role === 'Admin') { %>
+                  <div class="mt-3">
+                    <h6>Quick Actions:</h6>
+                    <a href="/komoditas/new" class="btn btn-sm btn-primary me-2">
+                      <i class="bi bi-plus"></i> Tambah Komoditas
+                    </a>
+                    <a href="/produksi/new" class="btn btn-sm btn-success">
+                      <i class="bi bi-plus"></i> Buat Rencana Produksi
+                    </a>
+                  </div>
+                <% } else if (user.role === 'Peneliti') { %>
+                  <div class="mt-3">
+                    <h6>Quick Actions:</h6>
+                    <a href="/formulasi/new" class="btn btn-sm btn-primary me-2">
+                      <i class="bi bi-plus"></i> Buat Formulasi
+                    </a>
+                    <a href="/analisis-gizi/new" class="btn btn-sm btn-success">
+                      <i class="bi bi-plus"></i> Tambah Analisis Gizi
+                    </a>
+                  </div>
+                <% } else if (user.role === 'Petugas Lapangan') { %>
+                  <div class="mt-3">
+                    <h6>Quick Actions:</h6>
+                    <a href="/distribusi/new" class="btn btn-sm btn-primary">
+                      <i class="bi bi-plus"></i> Tambah Distribusi
+                    </a>
+                  </div>
+                <% } %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

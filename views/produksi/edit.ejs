@@ -1,0 +1,93 @@
+<%- include('../partials/page-start', { title }) %>
+
+<div class="d-flex justify-content-between align-items-center mb-4 page-animate">
+  <h2><i class="bi bi-pencil-square"></i> Edit Rencana Produksi</h2>
+  <div class="d-flex gap-2">
+    <a href="/produksi/<%= produksi._id %>" class="btn btn-outline-primary"><i class="bi bi-eye"></i> Detail</a>
+    <a href="/produksi" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Kembali</a>
+  </div>
+</div>
+
+<%- include('../partials/flash') %>
+
+<form action="/produksi/<%= produksi._id %>?_method=PUT" method="POST" class="card">
+  <div class="card-body">
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label">Kode Produksi</label>
+        <input name="kodeProduksi" class="form-control" value="<%= produksi.kodeProduksi || '' %>" required />
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Batch Number</label>
+        <input name="batchNumber" class="form-control" value="<%= produksi.batchNumber || '' %>" required />
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Tanggal Produksi</label>
+        <input type="date" name="tanggalProduksi" class="form-control" value="<%= produksi.tanggalProduksi ? new Date(produksi.tanggalProduksi).toISOString().slice(0,10) : '' %>" required />
+      </div>
+
+      <div class="col-md-8">
+        <label class="form-label">Formulasi</label>
+        <select name="formulasi" class="form-select" required>
+          <option value="">-- pilih formulasi --</option>
+          <% (formulasi || []).forEach((f) => { %>
+            <option value="<%= f._id %>" <%= produksi.formulasi && String(produksi.formulasi._id || produksi.formulasi) === String(f._id) ? 'selected' : '' %>><%= f.kode %> - <%= f.nama %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label">Target Jumlah</label>
+        <input type="number" step="0.01" name="targetJumlah" class="form-control" value="<%= produksi.targetProduksi && produksi.targetProduksi.jumlah != null ? produksi.targetProduksi.jumlah : '' %>" />
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Target Satuan</label>
+        <input name="targetSatuan" class="form-control" value="<%= produksi.targetProduksi && produksi.targetProduksi.satuan ? produksi.targetProduksi.satuan : '' %>" />
+      </div>
+
+      <div class="col-md-2">
+        <label class="form-label">Hasil Jumlah</label>
+        <input type="number" step="0.01" name="hasilJumlah" class="form-control" value="<%= produksi.hasilProduksi && produksi.hasilProduksi.jumlah != null ? produksi.hasilProduksi.jumlah : '' %>" />
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Hasil Satuan</label>
+        <input name="hasilSatuan" class="form-control" value="<%= produksi.hasilProduksi && produksi.hasilProduksi.satuan ? produksi.hasilProduksi.satuan : '' %>" />
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label">Status</label>
+        <select name="status" class="form-select">
+          <% ['Perencanaan','Proses','Selesai','Dibatalkan'].forEach((s) => { %>
+            <option value="<%= s %>" <%= (produksi.status === s) ? 'selected' : '' %>><%= s %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Kualitas</label>
+        <select name="kualitas" class="form-select">
+          <% ['A','B','C','Reject'].forEach((k) => { %>
+            <option value="<%= k %>" <%= (produksi.kualitas === k) ? 'selected' : '' %>><%= k %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div class="col-12">
+        <label class="form-label">Peralatan (JSON)</label>
+        <textarea name="peralatan" class="form-control" rows="3"><%= Array.isArray(produksi.peralatan) ? JSON.stringify(produksi.peralatan, null, 2) : (produksi.peralatan || '[]') %></textarea>
+      </div>
+
+      <div class="col-12">
+        <label class="form-label">Proses Produksi (JSON)</label>
+        <textarea name="prosesProduksi" class="form-control" rows="4"><%= Array.isArray(produksi.prosesProduksi) ? JSON.stringify(produksi.prosesProduksi, null, 2) : (produksi.prosesProduksi || '[]') %></textarea>
+      </div>
+
+      <div class="col-12"><label class="form-label">Catatan</label><textarea name="catatan" class="form-control" rows="3"><%= produksi.catatan || '' %></textarea></div>
+    </div>
+  </div>
+  <div class="card-footer d-flex justify-content-end gap-2">
+    <a href="/produksi" class="btn btn-secondary">Batal</a>
+    <button class="btn btn-primary" type="submit"><i class="bi bi-save"></i> Simpan</button>
+  </div>
+</form>
+
+<%- include('../partials/page-end') %>

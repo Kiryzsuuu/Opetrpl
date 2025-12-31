@@ -1,0 +1,66 @@
+<%- include('../partials/page-start', { title }) %>
+
+<div class="d-flex justify-content-between align-items-center mb-4 page-animate">
+  <h2><i class="bi bi-plus-circle"></i> Tambah Analisis Gizi</h2>
+  <a href="/analisis-gizi" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Kembali</a>
+</div>
+
+<%- include('../partials/flash') %>
+
+<form action="/analisis-gizi" method="POST" class="card">
+  <div class="card-body">
+    <div class="row g-3">
+      <div class="col-md-8">
+        <label class="form-label">Formulasi</label>
+        <select name="formulasi" class="form-select" required>
+          <option value="">-- pilih formulasi --</option>
+          <% (formulasi || []).forEach((f) => { %>
+            <option value="<%= f._id %>" <%= (selectedFormulasi && String(selectedFormulasi._id) === String(f._id)) ? 'selected' : '' %>><%= f.kode %> - <%= f.nama %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Tanggal Analisis</label>
+        <input type="date" name="tanggalAnalisis" class="form-control" />
+      </div>
+
+      <div class="col-md-3"><label class="form-label">Kalori</label><input type="number" step="0.01" name="kalori" class="form-control" /></div>
+      <div class="col-md-3"><label class="form-label">Protein</label><input type="number" step="0.01" name="protein" class="form-control" /></div>
+      <div class="col-md-3"><label class="form-label">Lemak</label><input type="number" step="0.01" name="lemak" class="form-control" /></div>
+      <div class="col-md-3"><label class="form-label">Karbohidrat</label><input type="number" step="0.01" name="karbohidrat" class="form-control" /></div>
+
+      <div class="col-md-3"><label class="form-label">Serat</label><input type="number" step="0.01" name="serat" class="form-control" /></div>
+      <div class="col-md-3"><label class="form-label">Gula</label><input type="number" step="0.01" name="gula" class="form-control" /></div>
+      <div class="col-md-3"><label class="form-label">Natrium</label><input type="number" step="0.01" name="natrium" class="form-control" /></div>
+      <div class="col-md-3"><label class="form-label">Vitamin A</label><input type="number" step="0.01" name="vitaminA" class="form-control" /></div>
+
+      <div class="col-md-3"><label class="form-label">Vitamin C</label><input type="number" step="0.01" name="vitaminC" class="form-control" /></div>
+      <div class="col-md-3"><label class="form-label">Kalsium</label><input type="number" step="0.01" name="kalsium" class="form-control" /></div>
+      <div class="col-md-3"><label class="form-label">Zat Besi</label><input type="number" step="0.01" name="zatBesi" class="form-control" /></div>
+
+      <div class="col-md-6">
+        <label class="form-label">Metode Pengujian</label>
+        <input name="metodePengujian" class="form-control" />
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Status</label>
+        <select name="status" class="form-select">
+          <option value="Pending" selected>Pending</option>
+          <option value="Selesai">Selesai</option>
+          <option value="Perlu Review">Perlu Review</option>
+        </select>
+      </div>
+
+      <div class="col-12"><label class="form-label">Catatan</label><textarea name="catatan" class="form-control" rows="2"></textarea></div>
+      <div class="col-12"><label class="form-label">Kesimpulan</label><textarea name="kesimpulan" class="form-control" rows="2"></textarea></div>
+      <div class="col-12"><label class="form-label">Rekomendasi</label><textarea name="rekomendasi" class="form-control" rows="2"></textarea></div>
+    </div>
+  </div>
+
+  <div class="card-footer d-flex justify-content-end gap-2">
+    <a href="/analisis-gizi" class="btn btn-secondary">Batal</a>
+    <button class="btn btn-primary" type="submit"><i class="bi bi-save"></i> Simpan</button>
+  </div>
+</form>
+
+<%- include('../partials/page-end') %>

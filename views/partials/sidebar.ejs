@@ -1,0 +1,126 @@
+<div class="position-sticky pt-3">
+  <ul class="nav flex-column">
+    <li class="nav-item">
+      <a class="nav-link" href="/dashboard">
+        <i class="bi bi-house-door"></i> Dashboard
+      </a>
+    </li>
+    
+    <% if (user.role === 'Super Admin') { %>
+      <li class="nav-item">
+        <a class="nav-link" href="/users">
+          <i class="bi bi-people"></i> Management User
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/komoditas">
+          <i class="bi bi-box-seam"></i> Komoditas
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/formulasi">
+          <i class="bi bi-clipboard-data"></i> Formulasi Pangan
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/analisis-gizi">
+          <i class="bi bi-graph-up"></i> Analisis Gizi
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/uji-lab">
+          <i class="bi bi-flask"></i> Uji Laboratorium
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/produksi">
+          <i class="bi bi-gear"></i> Produksi
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/pengemasan">
+          <i class="bi bi-box"></i> Pengemasan
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/distribusi">
+          <i class="bi bi-truck"></i> Distribusi
+        </a>
+      </li>
+    <% } %>
+    
+    <% if (user.role === 'Admin') { %>
+      <li class="nav-item">
+        <a class="nav-link" href="/komoditas">
+          <i class="bi bi-box-seam"></i> Komoditas
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/formulasi">
+          <i class="bi bi-clipboard-data"></i> Formulasi Pangan
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/analisis-gizi">
+          <i class="bi bi-graph-up"></i> Analisis Gizi
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/uji-lab">
+          <i class="bi bi-flask"></i> Uji Laboratorium
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/produksi">
+          <i class="bi bi-gear"></i> Produksi
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/pengemasan">
+          <i class="bi bi-box"></i> Pengemasan
+        </a>
+      </li>
+    <% } %>
+    
+    <% if (user.role === 'Peneliti') { %>
+      <li class="nav-item">
+        <a class="nav-link" href="/formulasi">
+          <i class="bi bi-clipboard-data"></i> Formulasi Pangan
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/analisis-gizi">
+          <i class="bi bi-graph-up"></i> Analisis Gizi
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/uji-lab">
+          <i class="bi bi-flask"></i> Uji Laboratorium
+        </a>
+      </li>
+    <% } %>
+    
+    <% if (user.role === 'Admin' || user.role === 'Petugas Lapangan') { %>
+      <li class="nav-item">
+        <a class="nav-link" href="/distribusi">
+          <i class="bi bi-truck"></i> Distribusi
+        </a>
+      </li>
+    <% } %>
+    
+    <li class="nav-item">
+      <a class="nav-link" href="/laporan">
+        <i class="bi bi-file-earmark-text"></i> Laporan
+      </a>
+    </li>
+    
+    <li class="nav-item">
+      <a class="nav-link" href="/notifikasi">
+        <i class="bi bi-bell"></i> Notifikasi
+        <% if (unreadNotifications > 0) { %>
+          <span class="badge bg-danger"><%= unreadNotifications %></span>
+        <% } %>
+      </a>
+    </li>
+  </ul>
+</div>

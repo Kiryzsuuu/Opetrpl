@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <%- include('../partials/navbar') %>
+
+  <div class="container-fluid">
+    <div class="row">
+      <nav class="col-md-2 col-lg-2 d-md-block bg-light sidebar">
+        <%- include('../partials/sidebar') %>
+      </nav>
+
+      <main class="col-md-10 ms-sm-auto col-lg-10 px-md-4">
+        <div class="pt-3">
+          <div class="d-flex justify-content-between align-items-center mb-4 page-animate">
+            <h2><i class="bi bi-gear"></i> Produksi</h2>
+            <div class="d-flex gap-2">
+              <a href="/produksi/export/csv" class="btn btn-success">
+                <i class="bi bi-download"></i> Download CSV
+              </a>
+              <a href="/produksi/new" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Tambah Produksi
+              </a>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-body">
+              <% if (items.length === 0) { %>
+                <div class="alert alert-info">
+                  <i class="bi bi-info-circle"></i> Belum ada data produksi.
+                </div>
+              <% } else { %>
+                <div class="table-responsive">
+                  <table class="table table-hover">
+                    <thead>
+                      <tr>
+                        <th>No</th>
+                        <th>Kode Produksi</th>
+                        <th>Batch</th>
+                        <th>Formulasi</th>
+                        <th>Tanggal Produksi</th>
+                        <th>Target</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <% items.forEach((item, index) => { %>
+                        <tr>
+                          <td><%= index + 1 %></td>
+                          <td><a href="/produksi/<%= item._id %>"><%= item.kodeProduksi || '-' %></a></td>
+                          <td><%= item.batchNumber || '-' %></td>
+                          <td><%= item.formulasi && item.formulasi.nama ? item.formulasi.nama : '-' %></td>
+                          <td><%= new Date(item.tanggalProduksi).toLocaleDateString('id-ID') %></td>
+                          <td>
+                            <%= item.targetProduksi && item.targetProduksi.jumlah != null ? item.targetProduksi.jumlah : '-' %>
+                            <%= item.targetProduksi && item.targetProduksi.satuan ? item.targetProduksi.satuan : '' %>
+                          </td>
+                          <td><span class="badge bg-<%= item.status === 'Selesai' ? 'success' : item.status === 'Dibatalkan' ? 'danger' : 'warning' %>"><%= item.status %></span></td>
+                          <td>
+                            <div class="btn-group btn-group-sm">
+                              <a href="/produksi/<%= item._id %>" class="btn btn-info"><i class="bi bi-eye"></i></a>
+                              <a href="/produksi/<%= item._id %>/edit" class="btn btn-warning"><i class="bi bi-pencil"></i></a>
+                              <form action="/produksi/<%= item._id %>?_method=DELETE" method="POST" class="d-inline">
+                                <button type="submit" class="btn btn-danger" onclick="return confirm('Yakin ingin menghapus?')"><i class="bi bi-trash"></i></button>
+                              </form>
+                            </div>
+                          </td>
+                        </tr>
+                      <% }) %>
+                    </tbody>
+                  </table>
+                </div>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/main.js"></script>
+</body>
+</html>

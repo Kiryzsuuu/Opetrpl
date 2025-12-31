@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Sistem Komoditas</title>
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+  
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', 'Roboto', sans-serif; overflow-x: hidden; }
+    
+    .auth-container {
+      min-height: 100vh;
+      display: flex;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .auth-form-side {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      background: white;
+      z-index: 2;
+    }
+    
+    .auth-visual-side {
+      flex: 1;
+      background: linear-gradient(135deg, #9CAB88 0%, #89986D 50%, #C5D89D 100%);
+      position: relative;
+      overflow: hidden;
+      display: none;
+    }
+    
+    @media (min-width: 992px) {
+      .auth-visual-side { display: block; }
+    }
+    
+    .bg-shapes { position: absolute; width: 100%; height: 100%; overflow: hidden; }
+    .shape {
+      position: absolute;
+      opacity: 0.1;
+      animation: float 20s infinite ease-in-out;
+    }
+    
+    .shape-1 {
+      width: 300px;height: 300px;
+      background: white;
+      border-radius: 50%;
+      top: -100px;
+      right: -100px;
+      animation-delay: 0s;
+    }
+    
+    .shape-2 {
+      width: 200px;
+      height: 200px;
+      background: white;
+      border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+      bottom: 100px;
+      left: -50px;
+      animation-delay: 3s;
+    }
+    
+    .shape-3 {
+      width: 150px;
+      height: 150px;
+      background: white;
+      border-radius: 50%;
+      top: 50%;
+      right: 20%;
+      animation-delay: 6s;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      25% { transform: translateY(-20px) rotate(5deg); }
+      50% { transform: translateY(0) rotate(0deg); }
+      75% { transform: translateY(20px) rotate(-5deg); }
+    }
+    
+    .visual-content {
+      position: relative;
+      z-index: 2;
+      color: white;
+      text-align: center;
+      padding: 60px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    
+    .visual-content h1 {
+      font-size: 48px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      animation: slideInRight 1s ease-out;
+    }
+    
+    .visual-content p {
+      font-size: 20px;
+      opacity: 0.95;
+      line-height: 1.6;
+      animation: slideInRight 1s ease-out 0.2s both;
+    }
+    
+    .visual-icon {
+      font-size: 120px;
+      margin-bottom: 30px;
+      animation: bounceIn 1s ease-out;
+    }
+    
+    .form-container {
+      width: 100%;
+      max-width: 460px;
+      animation: fadeInUp 0.8s ease-out;
+    }
+    
+    .logo-section {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    
+    .logo-icon {
+      font-size: 60px;
+      color: #9CAB88;
+      margin-bottom: 15px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    .logo-section h2 {
+      font-size: 32px;
+      font-weight: 700;
+      color: #2c3e50;
+      margin-bottom: 8px;
+    }
+    
+    .logo-section p {
+      color: #7f8c8d;
+      font-size: 15px;
+    }
+    
+    .form-control {
+      padding: 14px 16px;
+      font-size: 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+      border-color: #9CAB88;
+      box-shadow: 0 0 0 4px rgba(156, 171, 136, 0.15);
+    }
+    
+    .input-group { position: relative; }
+    .input-icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #7f8c8d;
+      font-size: 18px;
+      z-index: 10;
+    }
+    
+    .input-group .form-control { padding-left: 48px; }
+    
+    .btn-auth {
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 8px;
+      border: none;
+      background: linear-gradient(135deg, #9CAB88 0%, #89986D 100%);
+      color: white;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(156, 171, 136, 0.3);
+    }
+    
+    .btn-auth:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(156, 171, 136, 0.4);
+      background: linear-gradient(135deg, #89986D 0%, #9CAB88 100%);
+    }
+    
+    .divider {
+      text-align: center;
+      margin: 24px 0;
+      position: relative;
+    }
+    
+    .divider::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      width: 100%;
+      height: 1px;
+      background: #e0e0e0;
+    }
+    
+    .divider span {
+      background: white;
+      padding: 0 16px;
+      color: #7f8c8d;
+      font-size: 14px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .switch-link {
+      text-align: center;
+      margin-top: 24px;
+      color: #7f8c8d;
+      font-size: 15px;
+    }
+    
+    .switch-link a {
+      color: #9CAB88;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+    
+    .switch-link a:hover {
+      color: #89986D;
+      text-decoration: underline;
+    }
+    
+    .alert {
+      border-radius: 8px;
+      border: none;
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      animation: slideInDown 0.4s ease-out;
+    }
+    
+    .alert-success {
+      background: #e8f5e9;
+      color: #2e7d32;
+      border-left: 4px solid #4caf50;
+    }
+    
+    .alert-danger {
+      background: #ffebee;
+      color: #c62828;
+      border-left: 4px solid #f44336;
+    }
+    
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(50px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    
+    @keyframes slideInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes bounceIn {
+      0% { opacity: 0; transform: scale(0.3); }
+      50% { opacity: 1; transform: scale(1.05); }
+      70% { transform: scale(0.9); }
+      100% { transform: scale(1); }
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    
+    @media (max-width: 991px) {
+      .auth-form-side { padding: 30px 20px; }
+      .form-container { max-width: 100%; }
+      .logo-section h2 { font-size: 28px; }
+    }
+    
+    @media (max-width: 576px) {
+      .logo-section h2 { font-size: 24px; }
+      .logo-icon { font-size: 50px; }
+      .form-control { padding: 12px 14px; font-size: 14px; }
+      .input-group .form-control { padding-left: 44px; }
+      .visual-content h1 { font-size: 32px; }
+      .visual-content p { font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-container">
+    <div class="auth-form-side">
+      <div class="form-container">
+        <div class="logo-section">
+          <div class="logo-icon">
+            <i class="bi bi-box-seam"></i>
+          </div>
+          <h2>Selamat Datang!</h2>
+          <p>Masuk ke Sistem Manajemen Komoditas</p>
+        </div>
+
+        <% if (locals.success && success.length > 0) { %>
+          <div class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle me-2"></i><%= success %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        <% } %>
+
+        <% if (locals.error && error.length > 0) { %>
+          <div class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-circle me-2"></i><%= error %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        <% } %>
+
+        <form action="/login" method="POST">
+          <div class="mb-3">
+            <label for="username" class="form-label">Username atau Email</label>
+            <div class="input-group">
+              <i class="bi bi-person input-icon"></i>
+              <input type="text" class="form-control" id="username" name="username" 
+                     placeholder="Masukkan username atau email" required autofocus>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label for="password" class="form-label">Password</label>
+            <div class="input-group">
+              <i class="bi bi-lock input-icon"></i>
+              <input type="password" class="form-control" id="password" name="password" 
+                     placeholder="Masukkan password" required>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-auth w-100">
+            <i class="bi bi-box-arrow-in-right me-2"></i>Masuk
+          </button>
+        </form>
+
+        <div class="divider"><span>atau</span></div>
+
+        <div class="switch-link">
+          Belum punya akun? <a href="/register">Daftar Sekarang</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="auth-visual-side">
+      <div class="bg-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+      </div>
+      
+      <div class="visual-content">
+        <div class="visual-icon">
+          <i class="bi bi-graph-up-arrow"></i>
+        </div>
+        <h1>Sistem Manajemen<br>Komoditas Terpadu</h1>
+        <p>Kelola komoditas, formulasi pangan, analisis gizi,<br>
+           hingga distribusi dalam satu platform modern</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    setTimeout(() => {
+      document.querySelectorAll('.alert').forEach(alert => {
+        new bootstrap.Alert(alert).close();
+      });
+    }, 5000);
+  </script>
+</body>
+</html>

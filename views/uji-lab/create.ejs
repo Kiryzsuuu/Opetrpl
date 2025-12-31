@@ -1,0 +1,70 @@
+<%- include('../partials/page-start', { title }) %>
+
+<div class="d-flex justify-content-between align-items-center mb-4 page-animate">
+  <h2><i class="bi bi-plus-circle"></i> Tambah Uji Laboratorium</h2>
+  <a href="/uji-lab" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Kembali</a>
+</div>
+
+<%- include('../partials/flash') %>
+
+<form action="/uji-lab" method="POST" class="card">
+  <div class="card-body">
+    <div class="row g-3">
+      <div class="col-md-8">
+        <label class="form-label">Formulasi</label>
+        <select name="formulasi" class="form-select" required>
+          <option value="">-- pilih formulasi --</option>
+          <% (formulasi || []).forEach((f) => { %>
+            <option value="<%= f._id %>" <%= (selectedFormulasi && String(selectedFormulasi._id) === String(f._id)) ? 'selected' : '' %>><%= f.kode %> - <%= f.nama %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Kode Uji</label>
+        <input name="kodeUji" class="form-control" required />
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label">Jenis Uji</label>
+        <select name="jenisUji" class="form-select" required>
+          <% ['Mikrobiologi','Kimia','Fisik','Sensori','Keamanan Pangan'].forEach((j) => { %>
+            <option value="<%= j %>"><%= j %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Tanggal Uji</label>
+        <input type="date" name="tanggalUji" class="form-control" required />
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Laboratorium</label>
+        <input name="laboratorium" class="form-control" />
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label">Hasil Uji</label>
+        <select name="hasilUji" class="form-select">
+          <option value="Pending" selected>Pending</option>
+          <option value="Lulus">Lulus</option>
+          <option value="Tidak Lulus">Tidak Lulus</option>
+        </select>
+      </div>
+
+      <div class="col-12">
+        <label class="form-label">Parameter Uji (JSON)</label>
+        <textarea name="parameterUji" class="form-control" rows="4">[]</textarea>
+        <div class="form-text">Format: [{"parameter":"TPC","nilai":"1","satuan":"CFU","status":"Lulus"}]</div>
+      </div>
+
+      <div class="col-12"><label class="form-label">Catatan</label><textarea name="catatan" class="form-control" rows="2"></textarea></div>
+      <div class="col-12"><label class="form-label">Rekomendasi</label><textarea name="rekomendasi" class="form-control" rows="2"></textarea></div>
+    </div>
+  </div>
+
+  <div class="card-footer d-flex justify-content-end gap-2">
+    <a href="/uji-lab" class="btn btn-secondary">Batal</a>
+    <button class="btn btn-primary" type="submit"><i class="bi bi-save"></i> Simpan</button>
+  </div>
+</form>
+
+<%- include('../partials/page-end') %>

@@ -1,0 +1,92 @@
+<%- include('../partials/page-start', { title }) %>
+
+<div class="d-flex justify-content-between align-items-center mb-4 page-animate">
+  <h2><i class="bi bi-pencil"></i> Edit Formulasi</h2>
+  <a href="/formulasi/<%= formulasi._id %>" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Kembali</a>
+</div>
+
+<%- include('../partials/flash') %>
+
+<form action="/formulasi/<%= formulasi._id %>?_method=PUT" method="POST" class="card">
+  <div class="card-body">
+    <div class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label">Kode</label>
+        <input name="kode" class="form-control" required value="<%= formulasi.kode %>" />
+      </div>
+      <div class="col-md-8">
+        <label class="form-label">Nama</label>
+        <input name="nama" class="form-control" required value="<%= formulasi.nama %>" />
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Kategori Produk</label>
+        <input name="kategoriProduk" class="form-control" required value="<%= formulasi.kategoriProduk %>" />
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Estimasi Waktu Produksi</label>
+        <input name="estimasiWaktuProduksi" class="form-control" value="<%= formulasi.estimasiWaktuProduksi || '' %>" />
+      </div>
+
+      <div class="col-12">
+        <label class="form-label">Deskripsi</label>
+        <textarea name="deskripsi" class="form-control" rows="3"><%= formulasi.deskripsi || '' %></textarea>
+      </div>
+
+      <div class="col-12">
+        <label class="form-label">Cara Produksi</label>
+        <textarea name="caraProduksi" class="form-control" rows="4" required><%= formulasi.caraProduksi || '' %></textarea>
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label">Target Hasil (Jumlah)</label>
+        <input type="number" name="targetHasil[jumlah]" class="form-control" min="0" step="0.01" value="<%= formulasi.targetHasil && formulasi.targetHasil.jumlah != null ? formulasi.targetHasil.jumlah : '' %>" />
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Target Hasil (Satuan)</label>
+        <input name="targetHasil[satuan]" class="form-control" value="<%= formulasi.targetHasil && formulasi.targetHasil.satuan ? formulasi.targetHasil.satuan : '' %>" />
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Status</label>
+        <select name="status" class="form-select">
+          <% ['Draft','Disetujui','Produksi','Ditolak'].forEach((s) => { %>
+            <option value="<%= s %>" <%= (formulasi.status === s) ? 'selected' : '' %>><%= s %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div class="col-12">
+        <label class="form-label">Komposisi (JSON)</label>
+        <textarea name="komposisi" id="komposisi" class="form-control" rows="5"></textarea>
+        <div class="form-text">Format: [{"komoditas":"<id>","jumlah":1,"satuan":"kg"}]</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-footer d-flex justify-content-end gap-2">
+    <a href="/formulasi/<%= formulasi._id %>" class="btn btn-secondary">Batal</a>
+    <button class="btn btn-primary" type="submit"><i class="bi bi-save"></i> Simpan</button>
+  </div>
+</form>
+
+<script type="application/json" id="komposisiData"><%- JSON.stringify((formulasi.komposisi || []).map((k) => ({
+  komoditas: (k.komoditas && k.komoditas._id) ? String(k.komoditas._id) : String(k.komoditas),
+  jumlah: k.jumlah,
+  satuan: k.satuan,
+  persentase: k.persentase
+}))) %></script>
+<script>
+  (function () {
+    const el = document.getElementById('komposisi');
+    const dataEl = document.getElementById('komposisiData');
+    if (!el || !dataEl) return;
+    try {
+      const data = JSON.parse(dataEl.textContent || '[]');
+      el.value = JSON.stringify(data);
+    } catch {
+      el.value = '[]';
+    }
+  })();
+</script>
+
+<%- include('../partials/page-end') %>

@@ -1,0 +1,89 @@
+<%- include('../partials/page-start', { title }) %>
+
+<div class="d-flex justify-content-between align-items-center mb-4 page-animate">
+  <h2><i class="bi bi-pencil-square"></i> Edit Distribusi</h2>
+  <div class="d-flex gap-2">
+    <a href="/distribusi/<%= distribusi._id %>" class="btn btn-outline-primary"><i class="bi bi-eye"></i> Detail</a>
+    <a href="/distribusi" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Kembali</a>
+  </div>
+</div>
+
+<%- include('../partials/flash') %>
+
+<form action="/distribusi/<%= distribusi._id %>?_method=PUT" method="POST" class="card">
+  <div class="card-body">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label">Kode Distribusi</label>
+        <input name="kodeDistribusi" class="form-control" value="<%= distribusi.kodeDistribusi || '' %>" required />
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Produksi</label>
+        <select name="produksi" class="form-select" required>
+          <option value="">-- pilih produksi --</option>
+          <% (produksi || []).forEach((p) => { %>
+            <option value="<%= p._id %>" <%= distribusi.produksi && String(distribusi.produksi._id || distribusi.produksi) === String(p._id) ? 'selected' : '' %>><%= p.kodeProduksi || '-' %> • Batch <%= p.batchNumber || '-' %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div class="col-md-4">
+        <label class="form-label">Tanggal Distribusi</label>
+        <input type="date" name="tanggalDistribusi" class="form-control" value="<%= distribusi.tanggalDistribusi ? new Date(distribusi.tanggalDistribusi).toISOString().slice(0,10) : '' %>" required />
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Jumlah Produk</label>
+        <input type="number" step="1" name="jumlahProduk" class="form-control" value="<%= distribusi.jumlahProduk ?? '' %>" required />
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Satuan</label>
+        <input name="satuan" class="form-control" value="<%= distribusi.satuan || '' %>" />
+      </div>
+
+      <div class="col-12"><hr class="my-2" /></div>
+
+      <div class="col-12"><h5 class="mb-0">Tujuan</h5></div>
+      <div class="col-md-6"><label class="form-label">Nama</label><input name="tujuanNama" class="form-control" value="<%= distribusi.tujuan?.nama || '' %>" /></div>
+      <div class="col-md-6"><label class="form-label">Kontak</label><input name="tujuanKontak" class="form-control" value="<%= distribusi.tujuan?.kontak || '' %>" /></div>
+      <div class="col-12"><label class="form-label">Alamat</label><input name="tujuanAlamat" class="form-control" value="<%= distribusi.tujuan?.alamat || '' %>" /></div>
+      <div class="col-md-4"><label class="form-label">Kota</label><input name="tujuanKota" class="form-control" value="<%= distribusi.tujuan?.kota || '' %>" /></div>
+      <div class="col-md-4"><label class="form-label">Provinsi</label><input name="tujuanProvinsi" class="form-control" value="<%= distribusi.tujuan?.provinsi || '' %>" /></div>
+      <div class="col-md-4"><label class="form-label">Kode Pos</label><input name="tujuanKodePos" class="form-control" value="<%= distribusi.tujuan?.kodePos || '' %>" /></div>
+
+      <div class="col-12"><hr class="my-2" /></div>
+
+      <div class="col-12"><h5 class="mb-0">Penerima</h5></div>
+      <div class="col-md-4"><label class="form-label">Nama</label><input name="penerimaNama" class="form-control" value="<%= distribusi.penerima?.nama || '' %>" /></div>
+      <div class="col-md-4"><label class="form-label">Jabatan</label><input name="penerimaJabatan" class="form-control" value="<%= distribusi.penerima?.jabatan || '' %>" /></div>
+      <div class="col-md-4"><label class="form-label">Kontak</label><input name="penerimaKontak" class="form-control" value="<%= distribusi.penerima?.kontak || '' %>" /></div>
+
+      <div class="col-12"><hr class="my-2" /></div>
+
+      <div class="col-12"><h5 class="mb-0">Kurir</h5></div>
+      <div class="col-md-4"><label class="form-label">Nama</label><input name="kurirNama" class="form-control" value="<%= distribusi.kurir?.nama || '' %>" /></div>
+      <div class="col-md-4"><label class="form-label">No Kendaraan</label><input name="kurirNoKendaraan" class="form-control" value="<%= distribusi.kurir?.noKendaraan || '' %>" /></div>
+      <div class="col-md-4"><label class="form-label">Kontak</label><input name="kurirKontak" class="form-control" value="<%= distribusi.kurir?.kontak || '' %>" /></div>
+
+      <div class="col-md-6"><label class="form-label">Estimasi Sampai</label><input type="date" name="estimasiSampai" class="form-control" value="<%= distribusi.estimasiSampai ? new Date(distribusi.estimasiSampai).toISOString().slice(0,10) : '' %>" /></div>
+      <div class="col-md-6"><label class="form-label">Tanggal Sampai</label><input type="date" name="tanggalSampai" class="form-control" value="<%= distribusi.tanggalSampai ? new Date(distribusi.tanggalSampai).toISOString().slice(0,10) : '' %>" /></div>
+
+      <div class="col-md-6">
+        <label class="form-label">Status</label>
+        <select name="status" class="form-select">
+          <% ['Persiapan','Dalam Perjalanan','Sampai','Dibatalkan'].forEach((s) => { %>
+            <option value="<%= s %>" <%= (distribusi.status === s) ? 'selected' : '' %>><%= s %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div class="col-12"><label class="form-label">Catatan</label><textarea name="catatan" class="form-control" rows="3"><%= distribusi.catatan || '' %></textarea></div>
+    </div>
+  </div>
+  <div class="card-footer d-flex justify-content-end gap-2">
+    <a href="/distribusi" class="btn btn-secondary">Batal</a>
+    <button class="btn btn-primary" type="submit"><i class="bi bi-save"></i> Simpan</button>
+  </div>
+</form>
+
+<%- include('../partials/page-end') %>

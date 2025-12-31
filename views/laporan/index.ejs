@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <%- include('../partials/navbar') %>
+
+  <div class="container-fluid">
+    <div class="row">
+      <nav class="col-md-2 col-lg-2 d-md-block bg-light sidebar">
+        <%- include('../partials/sidebar') %>
+      </nav>
+
+      <main class="col-md-10 ms-sm-auto col-lg-10 px-md-4">
+        <div class="pt-3">
+          <div class="d-flex justify-content-between align-items-center mb-4 page-animate">
+            <h2><i class="bi bi-file-earmark-text"></i> Laporan</h2>
+            <div class="btn-group">
+              <button class="btn btn-success" onclick="window.print()">
+                <i class="bi bi-printer"></i> Cetak
+              </button>
+              <button class="btn btn-primary" type="button" onclick="exportToExcel()">
+                <i class="bi bi-file-excel"></i> Export Excel
+              </button>
+            </div>
+          </div>
+
+<div class="row mb-4">
+  <div class="col-md-3 mb-3">
+    <div class="card text-white" style="background: linear-gradient(135deg, #9CAB88, #89986D);">
+      <div class="card-body text-center">
+        <i class="bi bi-box-seam" style="font-size: 2.5rem; margin-bottom: 10px;"></i>
+        <h5 class="card-title">Komoditas</h5>
+        <h2 class="mb-0"><%= stats.totalKomoditas || 0 %></h2>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3 mb-3">
+    <div class="card text-white" style="background: linear-gradient(135deg, #81C784, #66BB6A);">
+      <div class="card-body text-center">
+        <i class="bi bi-clipboard-data" style="font-size: 2.5rem; margin-bottom: 10px;"></i>
+        <h5 class="card-title">Formulasi</h5>
+        <h2 class="mb-0"><%= stats.totalFormulasi || 0 %></h2>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3 mb-3">
+    <div class="card text-white" style="background: linear-gradient(135deg, #4FC3F7, #29B6F6);">
+      <div class="card-body text-center">
+        <i class="bi bi-gear" style="font-size: 2.5rem; margin-bottom: 10px;"></i>
+        <h5 class="card-title">Produksi</h5>
+        <h2 class="mb-0"><%= stats.totalProduksi || 0 %></h2>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3 mb-3">
+    <div class="card text-white" style="background: linear-gradient(135deg, #C5D89D, #9CAB88);">
+      <div class="card-body text-center">
+        <i class="bi bi-truck" style="font-size: 2.5rem; margin-bottom: 10px;"></i>
+        <h5 class="card-title">Distribusi</h5>
+        <h2 class="mb-0"><%= stats.totalDistribusi || 0 %></h2>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h5 class="mb-0"><i class="bi bi-graph-up"></i> Laporan Keseluruhan</h5>
+  </div>
+  <div class="card-body">
+    <p class="mb-3">Pilih jenis laporan dan periode, lalu klik Tampilkan atau Export Excel.</p>
+    
+    <div class="row">
+      <div class="col-md-12">
+        <h6 class="text-secondary mb-3">Filter Laporan</h6>
+        <form class="row g-3" id="laporanForm" action="/laporan/generate" method="POST">
+          <div class="col-md-4">
+            <label class="form-label">Jenis Laporan</label>
+            <select class="form-select" name="jenisLaporan" required>
+              <option value="ringkasan" selected>Ringkasan</option>
+              <option value="komoditas">Komoditas</option>
+              <option value="formulasi">Formulasi</option>
+              <option value="produksi">Produksi</option>
+              <option value="pengemasan" disabled>Pengemasan (belum tersedia)</option>
+              <option value="distribusi">Distribusi</option>
+              <option value="analisis-gizi">Analisis Gizi</option>
+              <option value="uji-lab">Uji Lab</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Tanggal Mulai</label>
+            <input type="date" class="form-control" name="tanggalMulai">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Tanggal Akhir</label>
+            <input type="date" class="form-control" name="tanggalAkhir">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">&nbsp;</label>
+            <button type="submit" class="btn btn-primary w-100">
+              <i class="bi bi-search"></i> Tampilkan
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function exportToExcel() {
+    const form = document.getElementById('laporanForm');
+    const jenis = form.querySelector('[name="jenisLaporan"]').value;
+    const mulai = form.querySelector('[name="tanggalMulai"]').value;
+    const akhir = form.querySelector('[name="tanggalAkhir"]').value;
+
+    const params = new URLSearchParams();
+    params.set('jenisLaporan', jenis);
+    if (mulai) params.set('tanggalMulai', mulai);
+    if (akhir) params.set('tanggalAkhir', akhir);
+
+    window.location.href = `/laporan/export/excel?${params.toString()}`;
+  }
+</script>
+
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/main.js"></script>
+</body>
+</html>

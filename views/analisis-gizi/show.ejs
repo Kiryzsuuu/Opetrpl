@@ -1,0 +1,47 @@
+<%- include('../partials/page-start', { title }) %>
+
+<div class="d-flex justify-content-between align-items-center mb-4 page-animate">
+  <h2><i class="bi bi-eye"></i> Detail Analisis Gizi</h2>
+  <div class="d-flex gap-2">
+    <a href="/analisis-gizi" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Kembali</a>
+    <a href="/analisis-gizi/<%= analisis._id %>/edit" class="btn btn-warning"><i class="bi bi-pencil"></i> Edit</a>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <div class="row g-3">
+      <div class="col-md-8"><strong>Formulasi:</strong> <%= analisis.formulasi && analisis.formulasi.nama ? analisis.formulasi.nama : '-' %></div>
+      <div class="col-md-4"><strong>Tanggal:</strong> <%= analisis.tanggalAnalisis ? new Date(analisis.tanggalAnalisis).toLocaleDateString('id-ID') : '-' %></div>
+      <div class="col-md-4"><strong>Status:</strong> <span class="badge bg-secondary"><%= analisis.status %></span></div>
+      <div class="col-md-8"><strong>Metode:</strong> <%= analisis.metodePengujian || '-' %></div>
+
+      <div class="col-12">
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead><tr><th>Nutrisi</th><th>Nilai</th></tr></thead>
+            <tbody>
+              <tr><td>Kalori</td><td><%= analisis.analisis && analisis.analisis.kalori != null ? analisis.analisis.kalori : 0 %></td></tr>
+              <tr><td>Protein</td><td><%= analisis.analisis && analisis.analisis.protein != null ? analisis.analisis.protein : 0 %></td></tr>
+              <tr><td>Lemak</td><td><%= analisis.analisis && analisis.analisis.lemak != null ? analisis.analisis.lemak : 0 %></td></tr>
+              <tr><td>Karbohidrat</td><td><%= analisis.analisis && analisis.analisis.karbohidrat != null ? analisis.analisis.karbohidrat : 0 %></td></tr>
+              <tr><td>Serat</td><td><%= analisis.analisis && analisis.analisis.serat != null ? analisis.analisis.serat : 0 %></td></tr>
+              <tr><td>Gula</td><td><%= analisis.analisis && analisis.analisis.gula != null ? analisis.analisis.gula : 0 %></td></tr>
+              <tr><td>Natrium</td><td><%= analisis.analisis && analisis.analisis.natrium != null ? analisis.analisis.natrium : 0 %></td></tr>
+              <tr><td>Vitamin A</td><td><%= analisis.analisis && analisis.analisis.vitaminA != null ? analisis.analisis.vitaminA : 0 %></td></tr>
+              <tr><td>Vitamin C</td><td><%= analisis.analisis && analisis.analisis.vitaminC != null ? analisis.analisis.vitaminC : 0 %></td></tr>
+              <tr><td>Kalsium</td><td><%= analisis.analisis && analisis.analisis.kalsium != null ? analisis.analisis.kalsium : 0 %></td></tr>
+              <tr><td>Zat Besi</td><td><%= analisis.analisis && analisis.analisis.zatBesi != null ? analisis.analisis.zatBesi : 0 %></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="col-12"><strong>Catatan:</strong><br><%= analisis.catatan || '-' %></div>
+      <div class="col-12"><strong>Kesimpulan:</strong><br><%= analisis.kesimpulan || '-' %></div>
+      <div class="col-12"><strong>Rekomendasi:</strong><br><%= analisis.rekomendasi || '-' %></div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/page-end') %>
