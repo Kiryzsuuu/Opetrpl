@@ -72,23 +72,44 @@
       </div>
 
       <div class="col-12">
-        <label class="form-label">Peralatan (JSON)</label>
-        <textarea name="peralatan" class="form-control font-monospace" rows="6" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder='[{"namaAlat":"Mixer","status":"OK"}]'><%=
-          Array.isArray(produksi.peralatan)
-            ? (produksi.peralatan.length ? JSON.stringify(produksi.peralatan, null, 2) : '')
-            : (String(produksi.peralatan || '').trim() || '')
-        %></textarea>
-        <div class="form-text">Isi sebagai array JSON. Jika tidak ada, kosongkan atau isi <span class="font-monospace">[]</span>. Contoh: <span class="font-monospace">[{"namaAlat":"Mixer","status":"OK"}]</span></div>
+        <label class="form-label">Peralatan</label>
+        <input type="hidden" name="peralatan" id="peralatanJson" value="[]" />
+
+        <div class="border rounded p-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="text-muted small">Tambah baris peralatan (nama alat & status).</div>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="peralatanAdd">
+              <i class="bi bi-plus"></i> Tambah
+            </button>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+              <thead>
+                <tr>
+                  <th style="width: 45%">Nama Alat</th>
+                  <th style="width: 35%">Status</th>
+                  <th style="width: 20%"></th>
+                </tr>
+              </thead>
+              <tbody id="peralatanRows"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       <div class="col-12">
-        <label class="form-label">Proses Produksi (JSON)</label>
-        <textarea name="prosesProduksi" class="form-control font-monospace" rows="9" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder='[{"tahap":"Mixing","waktuMulai":"2025-01-01T08:00:00Z","waktuSelesai":"2025-01-01T09:00:00Z","pic":"Nama","catatan":"..."}]'><%=
-          Array.isArray(produksi.prosesProduksi)
-            ? (produksi.prosesProduksi.length ? JSON.stringify(produksi.prosesProduksi, null, 2) : '')
-            : (String(produksi.prosesProduksi || '').trim() || '')
-        %></textarea>
-        <div class="form-text">Isi sebagai array JSON. Gunakan format waktu ISO (contoh <span class="font-monospace">2025-01-01T08:00:00Z</span>). Jika tidak ada, kosongkan atau isi <span class="font-monospace">[]</span>.</div>
+        <label class="form-label">Proses Produksi</label>
+        <input type="hidden" name="prosesProduksi" id="prosesProduksiJson" value="[]" />
+
+        <div class="border rounded p-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="text-muted small">Tambah tahap proses (waktu mulai/selesai, PIC, catatan).</div>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="prosesAdd">
+              <i class="bi bi-plus"></i> Tambah
+            </button>
+          </div>
+          <div id="prosesRows" class="d-grid gap-2"></div>
+        </div>
       </div>
 
       <div class="col-12"><label class="form-label">Catatan</label><textarea name="catatan" class="form-control" rows="3"><%= produksi.catatan || '' %></textarea></div>
@@ -99,5 +120,180 @@
     <button class="btn btn-primary" type="submit"><i class="bi bi-save"></i> Simpan</button>
   </div>
 </form>
+
+<script type="application/json" id="peralatanData"><%- JSON.stringify(produksi.peralatan || []) %></script>
+<script type="application/json" id="prosesData"><%- JSON.stringify(produksi.prosesProduksi || []) %></script>
+
+<script>
+  (function () {
+    function safeTrim(v) {
+      return String(v == null ? '' : v).trim();
+    }
+
+    function isoToDatetimeLocal(iso) {
+      const v = safeTrim(iso);
+      if (!v) return '';
+      const d = new Date(v);
+      if (isNaN(d.getTime())) return '';
+      // Use UTC representation; good enough for display/edit.
+      return d.toISOString().slice(0, 16);
+    }
+
+    function toIsoOrEmpty(datetimeLocalValue) {
+      const v = safeTrim(datetimeLocalValue);
+      if (!v) return '';
+      const d = new Date(v);
+      return isNaN(d.getTime()) ? '' : d.toISOString();
+    }
+
+    function renderPeralatanRow(item) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><input class="form-control form-control-sm" data-field="namaAlat" placeholder="Contoh: Mixer" /></td>
+        <td><input class="form-control form-control-sm" data-field="status" placeholder="Contoh: OK" /></td>
+        <td class="text-end">
+          <button type="button" class="btn btn-sm btn-outline-danger" data-action="remove">
+            <i class="bi bi-trash"></i>
+          </button>
+        </td>
+      `;
+      tr.querySelector('[data-field="namaAlat"]').value = item && item.namaAlat ? item.namaAlat : '';
+      tr.querySelector('[data-field="status"]').value = item && item.status ? item.status : '';
+      return tr;
+    }
+
+    function renderProsesCard(item) {
+      const wrap = document.createElement('div');
+      wrap.className = 'border rounded p-3';
+      wrap.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="fw-semibold">Tahap</div>
+          <button type="button" class="btn btn-sm btn-outline-danger" data-action="remove">
+            <i class="bi bi-trash"></i> Hapus
+          </button>
+        </div>
+        <div class="row g-2">
+          <div class="col-md-4">
+            <label class="form-label small text-muted mb-1">Nama Tahap</label>
+            <input class="form-control form-control-sm" data-field="tahap" placeholder="Contoh: Mixing" />
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small text-muted mb-1">Waktu Mulai</label>
+            <input type="datetime-local" class="form-control form-control-sm" data-field="waktuMulai" />
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small text-muted mb-1">Waktu Selesai</label>
+            <input type="datetime-local" class="form-control form-control-sm" data-field="waktuSelesai" />
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small text-muted mb-1">PIC</label>
+            <input class="form-control form-control-sm" data-field="pic" placeholder="Nama penanggung jawab" />
+          </div>
+          <div class="col-12">
+            <label class="form-label small text-muted mb-1">Catatan</label>
+            <input class="form-control form-control-sm" data-field="catatan" placeholder="Opsional" />
+          </div>
+        </div>
+      `;
+      wrap.querySelector('[data-field="tahap"]').value = item && item.tahap ? item.tahap : '';
+      wrap.querySelector('[data-field="pic"]').value = item && item.pic ? item.pic : '';
+      wrap.querySelector('[data-field="catatan"]').value = item && item.catatan ? item.catatan : '';
+      wrap.querySelector('[data-field="waktuMulai"]').value = item && item.waktuMulai ? isoToDatetimeLocal(item.waktuMulai) : '';
+      wrap.querySelector('[data-field="waktuSelesai"]').value = item && item.waktuSelesai ? isoToDatetimeLocal(item.waktuSelesai) : '';
+      return wrap;
+    }
+
+    function collectPeralatan() {
+      const rows = Array.from(document.querySelectorAll('#peralatanRows tr'));
+      return rows
+        .map((tr) => ({
+          namaAlat: safeTrim(tr.querySelector('[data-field="namaAlat"]').value),
+          status: safeTrim(tr.querySelector('[data-field="status"]').value)
+        }))
+        .filter((it) => it.namaAlat || it.status);
+    }
+
+    function collectProses() {
+      const cards = Array.from(document.querySelectorAll('#prosesRows > .border'));
+      return cards
+        .map((el) => ({
+          tahap: safeTrim(el.querySelector('[data-field="tahap"]').value),
+          waktuMulai: toIsoOrEmpty(el.querySelector('[data-field="waktuMulai"]').value),
+          waktuSelesai: toIsoOrEmpty(el.querySelector('[data-field="waktuSelesai"]').value),
+          pic: safeTrim(el.querySelector('[data-field="pic"]').value),
+          catatan: safeTrim(el.querySelector('[data-field="catatan"]').value)
+        }))
+        .filter((it) => it.tahap || it.waktuMulai || it.waktuSelesai || it.pic || it.catatan);
+    }
+
+    function syncHidden() {
+      document.getElementById('peralatanJson').value = JSON.stringify(collectPeralatan());
+      document.getElementById('prosesProduksiJson').value = JSON.stringify(collectProses());
+    }
+
+    let peralatanInit = [];
+    let prosesInit = [];
+    try {
+      peralatanInit = JSON.parse(document.getElementById('peralatanData').textContent || '[]') || [];
+    } catch (_) {
+      peralatanInit = [];
+    }
+    try {
+      prosesInit = JSON.parse(document.getElementById('prosesData').textContent || '[]') || [];
+    } catch (_) {
+      prosesInit = [];
+    }
+
+    const peralatanRows = document.getElementById('peralatanRows');
+    (Array.isArray(peralatanInit) && peralatanInit.length ? peralatanInit : [{ namaAlat: '', status: '' }]).forEach((it) => {
+      peralatanRows.appendChild(renderPeralatanRow(it));
+    });
+
+    const prosesRows = document.getElementById('prosesRows');
+    (Array.isArray(prosesInit) && prosesInit.length ? prosesInit : [{}]).forEach((it) => {
+      prosesRows.appendChild(renderProsesCard(it));
+    });
+
+    document.getElementById('peralatanAdd').addEventListener('click', function () {
+      peralatanRows.appendChild(renderPeralatanRow({}));
+      syncHidden();
+    });
+    document.getElementById('prosesAdd').addEventListener('click', function () {
+      prosesRows.appendChild(renderProsesCard({}));
+      syncHidden();
+    });
+
+    document.addEventListener('click', function (e) {
+      const btn = e.target.closest && e.target.closest('button[data-action="remove"]');
+      if (!btn) return;
+      const tr = btn.closest('tr');
+      if (tr && tr.parentElement && tr.parentElement.id === 'peralatanRows') {
+        tr.remove();
+        syncHidden();
+        return;
+      }
+      const card = btn.closest('.border');
+      if (card && card.parentElement && card.parentElement.id === 'prosesRows') {
+        card.remove();
+        syncHidden();
+      }
+    });
+
+    document.addEventListener('input', function (e) {
+      if (e.target && (e.target.closest('#peralatanRows') || e.target.closest('#prosesRows'))) {
+        syncHidden();
+      }
+    });
+
+    const form = document.querySelector('form[action^="/produksi/"]');
+    if (form) {
+      form.addEventListener('submit', function () {
+        syncHidden();
+      });
+    }
+
+    syncHidden();
+  })();
+</script>
 
 <%- include('../partials/page-end') %>
