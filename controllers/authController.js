@@ -154,7 +154,7 @@ class AuthController {
 
       if (!user) {
         req.flash('success', successMessage);
-        return res.redirect('/forgot-password');
+        return res.redirect('/reset-password');
       }
 
       const otp = String(crypto.randomInt(0, 1000000)).padStart(6, '0');
@@ -176,7 +176,7 @@ class AuthController {
       });
 
       req.flash('success', successMessage);
-      res.redirect('/forgot-password');
+      res.redirect('/reset-password');
     } catch (err) {
       console.error(err);
       req.flash('error', 'Gagal mengirim email reset password. Coba lagi nanti.');
