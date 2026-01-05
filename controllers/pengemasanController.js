@@ -1,6 +1,7 @@
 const Pengemasan = require('../models/Pengemasan');
 const Produksi = require('../models/Produksi');
 const { toCsv } = require('../utils/csv');
+const { parseJsonArray } = require('../utils/json');
 
 class PengemasanController {
   // List semua pengemasan
@@ -59,8 +60,8 @@ class PengemasanController {
       const pengemasanData = {
         ...req.body,
         penanggungJawab: req.session.userId,
-        sertifikasiKeamanan: JSON.parse(req.body.sertifikasiKeamanan || '[]'),
-        auditTrail: JSON.parse(req.body.auditTrail || '[]'),
+        sertifikasiKeamanan: parseJsonArray(req.body.sertifikasiKeamanan),
+        auditTrail: parseJsonArray(req.body.auditTrail),
         labelNutrisi: req.body.labelNutrisi === 'true',
         labelHalal: req.body.labelHalal === 'true'
       };
@@ -137,8 +138,8 @@ class PengemasanController {
     try {
       const updateData = {
         ...req.body,
-        sertifikasiKeamanan: JSON.parse(req.body.sertifikasiKeamanan || '[]'),
-        auditTrail: JSON.parse(req.body.auditTrail || '[]'),
+        sertifikasiKeamanan: parseJsonArray(req.body.sertifikasiKeamanan),
+        auditTrail: parseJsonArray(req.body.auditTrail),
         labelNutrisi: req.body.labelNutrisi === 'true',
         labelHalal: req.body.labelHalal === 'true'
       };

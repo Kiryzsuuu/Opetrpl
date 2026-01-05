@@ -1,6 +1,7 @@
 const Produksi = require('../models/Produksi');
 const Formulasi = require('../models/Formulasi');
 const { toCsv } = require('../utils/csv');
+const { parseJsonArray } = require('../utils/json');
 
 class ProduksiController {
   // List semua produksi
@@ -50,8 +51,8 @@ class ProduksiController {
       const produksiData = {
         ...req.body,
         supervisor: req.session.userId,
-        peralatan: JSON.parse(req.body.peralatan || '[]'),
-        prosesProduksi: JSON.parse(req.body.prosesProduksi || '[]'),
+        peralatan: parseJsonArray(req.body.peralatan),
+        prosesProduksi: parseJsonArray(req.body.prosesProduksi),
         targetProduksi: {
           jumlah: req.body.targetJumlah,
           satuan: req.body.targetSatuan
@@ -138,8 +139,8 @@ class ProduksiController {
     try {
       const updateData = {
         ...req.body,
-        peralatan: JSON.parse(req.body.peralatan || '[]'),
-        prosesProduksi: JSON.parse(req.body.prosesProduksi || '[]'),
+        peralatan: parseJsonArray(req.body.peralatan),
+        prosesProduksi: parseJsonArray(req.body.prosesProduksi),
         targetProduksi: {
           jumlah: req.body.targetJumlah,
           satuan: req.body.targetSatuan

@@ -1,6 +1,7 @@
 const UjiLab = require('../models/UjiLab');
 const Formulasi = require('../models/Formulasi');
 const { toCsv } = require('../utils/csv');
+const { parseJsonArray } = require('../utils/json');
 
 class UjiLabController {
   // List semua uji lab
@@ -59,7 +60,7 @@ class UjiLabController {
       const ujiLabData = {
         ...req.body,
         penanggungJawab: req.session.userId,
-        parameterUji: JSON.parse(req.body.parameterUji || '[]')
+        parameterUji: parseJsonArray(req.body.parameterUji)
       };
       
       await UjiLab.create(ujiLabData);
@@ -129,7 +130,7 @@ class UjiLabController {
     try {
       const updateData = {
         ...req.body,
-        parameterUji: JSON.parse(req.body.parameterUji || '[]')
+        parameterUji: parseJsonArray(req.body.parameterUji)
       };
       
       await UjiLab.findByIdAndUpdate(req.params.id, updateData);
