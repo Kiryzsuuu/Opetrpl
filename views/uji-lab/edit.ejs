@@ -54,13 +54,31 @@
       </div>
 
       <div class="col-12">
-        <label class="form-label">Parameter Uji (JSON)</label>
-        <textarea name="parameterUji" class="form-control font-monospace" rows="8" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder='[{"parameter":"TPC","nilai":"1","satuan":"CFU","status":"Lulus"}]'><%=
-          Array.isArray(ujiLab.parameterUji)
-            ? (ujiLab.parameterUji.length ? JSON.stringify(ujiLab.parameterUji, null, 2) : '')
-            : (String(ujiLab.parameterUji || '').trim() || '')
-        %></textarea>
-        <div class="form-text">Isi sebagai array JSON. Jika tidak ada, kosongkan atau isi <span class="font-monospace">[]</span>. Contoh: <span class="font-monospace">[{"parameter":"TPC","nilai":"1","satuan":"CFU","status":"Lulus"}]</span></div>
+        <label class="form-label">Parameter Uji</label>
+        <input type="hidden" name="parameterUji" id="parameterUjiJson" value="[]" />
+
+        <div class="border rounded p-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="text-muted small">Tambah baris parameter uji (parameter, nilai, satuan, status).</div>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="parameterAdd">
+              <i class="bi bi-plus"></i> Tambah
+            </button>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+              <thead>
+                <tr>
+                  <th style="width: 30%">Parameter</th>
+                  <th style="width: 20%">Nilai</th>
+                  <th style="width: 20%">Satuan</th>
+                  <th style="width: 20%">Status</th>
+                  <th style="width: 10%"></th>
+                </tr>
+              </thead>
+              <tbody id="parameterRows"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       <div class="col-12"><label class="form-label">Catatan</label><textarea name="catatan" class="form-control" rows="2"><%= ujiLab.catatan || '' %></textarea></div>
@@ -73,5 +91,83 @@
     <button class="btn btn-primary" type="submit"><i class="bi bi-save"></i> Simpan</button>
   </div>
 </form>
+
+<script type="application/json" id="parameterData"><%- JSON.stringify(ujiLab.parameterUji || []) %></script>
+
+<script>
+  (function () {
+    function safeTrim(v) {
+      return String(v == null ? '' : v).trim();
+    }
+
+    function renderRow(item) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><input class="form-control form-control-sm" data-field="parameter" placeholder="Contoh: TPC" /></td>
+        <td><input class="form-control form-control-sm" data-field="nilai" placeholder="Contoh: 1" /></td>
+        <td><input class="form-control form-control-sm" data-field="satuan" placeholder="Contoh: CFU" /></td>
+        <td><input class="form-control form-control-sm" data-field="status" placeholder="Contoh: Lulus" /></td>
+        <td class="text-end">
+          <button type="button" class="btn btn-sm btn-outline-danger" data-action="remove"><i class="bi bi-trash"></i></button>
+        </td>
+      `;
+      tr.querySelector('[data-field="parameter"]').value = item && item.parameter ? item.parameter : '';
+      tr.querySelector('[data-field="nilai"]').value = item && item.nilai ? item.nilai : '';
+      tr.querySelector('[data-field="satuan"]').value = item && item.satuan ? item.satuan : '';
+      tr.querySelector('[data-field="status"]').value = item && item.status ? item.status : '';
+      return tr;
+    }
+
+    function collect() {
+      const rows = Array.from(document.querySelectorAll('#parameterRows tr'));
+      return rows
+        .map((tr) => ({
+          parameter: safeTrim(tr.querySelector('[data-field="parameter"]').value),
+          nilai: safeTrim(tr.querySelector('[data-field="nilai"]').value),
+          satuan: safeTrim(tr.querySelector('[data-field="satuan"]').value),
+          status: safeTrim(tr.querySelector('[data-field="status"]').value)
+        }))
+        .filter((it) => it.parameter || it.nilai || it.satuan || it.status);
+    }
+
+    function syncHidden() {
+      document.getElementById('parameterUjiJson').value = JSON.stringify(collect());
+    }
+
+    let init = [];
+    try {
+      init = JSON.parse(document.getElementById('parameterData').textContent || '[]') || [];
+    } catch (_) {
+      init = [];
+    }
+
+    const rowsEl = document.getElementById('parameterRows');
+    (Array.isArray(init) && init.length ? init : [{}]).forEach((it) => rowsEl.appendChild(renderRow(it)));
+
+    document.getElementById('parameterAdd').addEventListener('click', function () {
+      rowsEl.appendChild(renderRow({}));
+      syncHidden();
+    });
+
+    document.addEventListener('click', function (e) {
+      const btn = e.target.closest && e.target.closest('button[data-action="remove"]');
+      if (!btn) return;
+      const tr = btn.closest('tr');
+      if (tr && tr.parentElement && tr.parentElement.id === 'parameterRows') {
+        tr.remove();
+        syncHidden();
+      }
+    });
+
+    document.addEventListener('input', function (e) {
+      if (e.target && e.target.closest('#parameterRows')) syncHidden();
+    });
+
+    const form = document.querySelector('form[action^="/uji-lab/"]');
+    if (form) form.addEventListener('submit', syncHidden);
+
+    syncHidden();
+  })();
+</script>
 
 <%- include('../partials/page-end') %>

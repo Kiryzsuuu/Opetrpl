@@ -76,23 +76,58 @@
       </div>
 
       <div class="col-12">
-        <label class="form-label">Sertifikasi Keamanan (JSON)</label>
-        <textarea name="sertifikasiKeamanan" class="form-control font-monospace" rows="6" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder='[{"jenisSertifikat":"BPOM","nomorSertifikat":"...","tanggalBerlaku":"2025-01-01"}]'><%=
-          Array.isArray(pengemasan.sertifikasiKeamanan)
-            ? (pengemasan.sertifikasiKeamanan.length ? JSON.stringify(pengemasan.sertifikasiKeamanan, null, 2) : '')
-            : (String(pengemasan.sertifikasiKeamanan || '').trim() || '')
-        %></textarea>
-        <div class="form-text">Isi sebagai array JSON. Jika tidak ada, kosongkan atau isi <span class="font-monospace">[]</span>. Contoh: <span class="font-monospace">[{"jenisSertifikat":"BPOM","nomorSertifikat":"...","tanggalBerlaku":"2025-01-01"}]</span></div>
+        <label class="form-label">Sertifikasi Keamanan</label>
+        <input type="hidden" name="sertifikasiKeamanan" id="sertifikasiJson" value="[]" />
+
+        <div class="border rounded p-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="text-muted small">Tambah baris sertifikat (jenis, nomor, tanggal berlaku).</div>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="sertifikasiAdd">
+              <i class="bi bi-plus"></i> Tambah
+            </button>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+              <thead>
+                <tr>
+                  <th style="width: 30%">Jenis Sertifikat</th>
+                  <th style="width: 40%">Nomor Sertifikat</th>
+                  <th style="width: 20%">Tanggal Berlaku</th>
+                  <th style="width: 10%"></th>
+                </tr>
+              </thead>
+              <tbody id="sertifikasiRows"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       <div class="col-12">
-        <label class="form-label">Audit Trail (JSON)</label>
-        <textarea name="auditTrail" class="form-control font-monospace" rows="7" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder='[{"tanggal":"2025-01-01","aktivitas":"QC","pic":"USER_ID","hasil":"OK"}]'><%=
-          Array.isArray(pengemasan.auditTrail)
-            ? (pengemasan.auditTrail.length ? JSON.stringify(pengemasan.auditTrail, null, 2) : '')
-            : (String(pengemasan.auditTrail || '').trim() || '')
-        %></textarea>
-        <div class="form-text">Isi sebagai array JSON. Jika tidak ada, kosongkan atau isi <span class="font-monospace">[]</span>. Contoh: <span class="font-monospace">[{"tanggal":"2025-01-01","aktivitas":"QC","pic":"USER_ID","hasil":"OK"}]</span></div>
+        <label class="form-label">Audit Trail</label>
+        <input type="hidden" name="auditTrail" id="auditTrailJson" value="[]" />
+
+        <div class="border rounded p-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div class="text-muted small">Tambah catatan aktivitas (tanggal, aktivitas, PIC, hasil).</div>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="auditAdd">
+              <i class="bi bi-plus"></i> Tambah
+            </button>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+              <thead>
+                <tr>
+                  <th style="width: 20%">Tanggal</th>
+                  <th style="width: 30%">Aktivitas</th>
+                  <th style="width: 25%">PIC</th>
+                  <th style="width: 15%">Hasil</th>
+                  <th style="width: 10%"></th>
+                </tr>
+              </thead>
+              <tbody id="auditRows"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       <div class="col-12"><label class="form-label">Catatan</label><textarea name="catatan" class="form-control" rows="3"><%= pengemasan.catatan || '' %></textarea></div>
@@ -103,5 +138,129 @@
     <button class="btn btn-primary" type="submit"><i class="bi bi-save"></i> Simpan</button>
   </div>
 </form>
+
+<script type="application/json" id="sertifikasiData"><%- JSON.stringify(pengemasan.sertifikasiKeamanan || []) %></script>
+<script type="application/json" id="auditData"><%- JSON.stringify(pengemasan.auditTrail || []) %></script>
+
+<script>
+  (function () {
+    function safeTrim(v) {
+      return String(v == null ? '' : v).trim();
+    }
+
+    function toDateInput(v) {
+      const s = safeTrim(v);
+      if (!s) return '';
+      const d = new Date(s);
+      if (isNaN(d.getTime())) return s.slice(0, 10);
+      return d.toISOString().slice(0, 10);
+    }
+
+    function renderSertRow(item) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><input class="form-control form-control-sm" data-field="jenisSertifikat" placeholder="Contoh: BPOM" /></td>
+        <td><input class="form-control form-control-sm" data-field="nomorSertifikat" placeholder="Contoh: MD-xxxx" /></td>
+        <td><input type="date" class="form-control form-control-sm" data-field="tanggalBerlaku" /></td>
+        <td class="text-end"><button type="button" class="btn btn-sm btn-outline-danger" data-action="remove"><i class="bi bi-trash"></i></button></td>
+      `;
+      tr.querySelector('[data-field="jenisSertifikat"]').value = item && item.jenisSertifikat ? item.jenisSertifikat : '';
+      tr.querySelector('[data-field="nomorSertifikat"]').value = item && item.nomorSertifikat ? item.nomorSertifikat : '';
+      tr.querySelector('[data-field="tanggalBerlaku"]').value = item && item.tanggalBerlaku ? toDateInput(item.tanggalBerlaku) : '';
+      return tr;
+    }
+
+    function renderAuditRow(item) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><input type="date" class="form-control form-control-sm" data-field="tanggal" /></td>
+        <td><input class="form-control form-control-sm" data-field="aktivitas" placeholder="Contoh: QC" /></td>
+        <td><input class="form-control form-control-sm" data-field="pic" placeholder="Nama/ID" /></td>
+        <td><input class="form-control form-control-sm" data-field="hasil" placeholder="OK" /></td>
+        <td class="text-end"><button type="button" class="btn btn-sm btn-outline-danger" data-action="remove"><i class="bi bi-trash"></i></button></td>
+      `;
+      tr.querySelector('[data-field="tanggal"]').value = item && item.tanggal ? toDateInput(item.tanggal) : '';
+      tr.querySelector('[data-field="aktivitas"]').value = item && item.aktivitas ? item.aktivitas : '';
+      tr.querySelector('[data-field="pic"]').value = item && item.pic ? item.pic : '';
+      tr.querySelector('[data-field="hasil"]').value = item && item.hasil ? item.hasil : '';
+      return tr;
+    }
+
+    function collectSert() {
+      const rows = Array.from(document.querySelectorAll('#sertifikasiRows tr'));
+      return rows
+        .map((tr) => ({
+          jenisSertifikat: safeTrim(tr.querySelector('[data-field="jenisSertifikat"]').value),
+          nomorSertifikat: safeTrim(tr.querySelector('[data-field="nomorSertifikat"]').value),
+          tanggalBerlaku: safeTrim(tr.querySelector('[data-field="tanggalBerlaku"]').value)
+        }))
+        .filter((it) => it.jenisSertifikat || it.nomorSertifikat || it.tanggalBerlaku);
+    }
+
+    function collectAudit() {
+      const rows = Array.from(document.querySelectorAll('#auditRows tr'));
+      return rows
+        .map((tr) => ({
+          tanggal: safeTrim(tr.querySelector('[data-field="tanggal"]').value),
+          aktivitas: safeTrim(tr.querySelector('[data-field="aktivitas"]').value),
+          pic: safeTrim(tr.querySelector('[data-field="pic"]').value),
+          hasil: safeTrim(tr.querySelector('[data-field="hasil"]').value)
+        }))
+        .filter((it) => it.tanggal || it.aktivitas || it.pic || it.hasil);
+    }
+
+    function syncHidden() {
+      document.getElementById('sertifikasiJson').value = JSON.stringify(collectSert());
+      document.getElementById('auditTrailJson').value = JSON.stringify(collectAudit());
+    }
+
+    let sertInit = [];
+    let auditInit = [];
+    try {
+      sertInit = JSON.parse(document.getElementById('sertifikasiData').textContent || '[]') || [];
+    } catch (_) {
+      sertInit = [];
+    }
+    try {
+      auditInit = JSON.parse(document.getElementById('auditData').textContent || '[]') || [];
+    } catch (_) {
+      auditInit = [];
+    }
+
+    const sertRows = document.getElementById('sertifikasiRows');
+    (Array.isArray(sertInit) && sertInit.length ? sertInit : [{}]).forEach((it) => sertRows.appendChild(renderSertRow(it)));
+
+    const auditRows = document.getElementById('auditRows');
+    (Array.isArray(auditInit) && auditInit.length ? auditInit : [{}]).forEach((it) => auditRows.appendChild(renderAuditRow(it)));
+
+    document.getElementById('sertifikasiAdd').addEventListener('click', function () {
+      sertRows.appendChild(renderSertRow({}));
+      syncHidden();
+    });
+    document.getElementById('auditAdd').addEventListener('click', function () {
+      auditRows.appendChild(renderAuditRow({}));
+      syncHidden();
+    });
+
+    document.addEventListener('click', function (e) {
+      const btn = e.target.closest && e.target.closest('button[data-action="remove"]');
+      if (!btn) return;
+      const tr = btn.closest('tr');
+      if (tr && tr.parentElement && (tr.parentElement.id === 'sertifikasiRows' || tr.parentElement.id === 'auditRows')) {
+        tr.remove();
+        syncHidden();
+      }
+    });
+
+    document.addEventListener('input', function (e) {
+      if (e.target && (e.target.closest('#sertifikasiRows') || e.target.closest('#auditRows'))) syncHidden();
+    });
+
+    const form = document.querySelector('form[action^="/pengemasan/"]');
+    if (form) form.addEventListener('submit', syncHidden);
+
+    syncHidden();
+  })();
+</script>
 
 <%- include('../partials/page-end') %>
