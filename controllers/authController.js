@@ -1,6 +1,6 @@
 const User = require('../models/User');
 const crypto = require('crypto');
-const { sendPasswordResetEmail } = require('../config/mailer');
+const { sendPasswordResetOtpEmail } = require('../config/mailer');
 
 function normalizeEmail(email) {
   return String(email || '').trim().toLowerCase();
@@ -157,16 +157,22 @@ class AuthController {
         return res.redirect('/forgot-password');
       }
 
-      const token = crypto.randomBytes(32).toString('hex');
-      const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+      const otp = String(crypto.randomInt(0, 1000000)).padStart(6, '0');
+      const otpHash = crypto.createHash('sha256').update(otp).digest('hex');
 
-      user.resetPasswordTokenHash = tokenHash;
-      user.resetPasswordExpiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 jam
+      user.resetPasswordOtpHash = otpHash;
+      user.resetPasswordOtpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 menit
+      user.resetPasswordOtpAttempts = 0;
+
+      // clear legacy token-based reset fields
+      user.resetPasswordTokenHash = undefined;
+      user.resetPasswordExpiresAt = undefined;
+
       await user.save();
 
-      await sendPasswordResetEmail({
+      await sendPasswordResetOtpEmail({
         to: user.email,
-        token
+        otp
       });
 
       req.flash('success', successMessage);
@@ -187,6 +193,67 @@ class AuthController {
       success: req.flash('success'),
       error: req.flash('error')
     });
+  }
+
+  // Tampilkan halaman reset password via OTP
+  async showResetPasswordOtp(req, res) {
+    res.render('auth/reset-password-otp', {
+      title: 'Reset Password',
+      success: req.flash('success'),
+      error: req.flash('error')
+    });
+  }
+
+  // Proses reset password via OTP
+  async resetPasswordOtp(req, res) {
+    try {
+      const { email, otp, password, confirmPassword } = req.body;
+      const normalizedEmail = normalizeEmail(email);
+
+      if (password !== confirmPassword) {
+        req.flash('error', 'Password dan Konfirmasi Password tidak sama');
+        return res.redirect('/reset-password');
+      }
+
+      const user = await User.findOne({ email: normalizedEmail });
+      const genericError = 'OTP tidak valid atau sudah kadaluarsa.';
+
+      if (!user || !user.resetPasswordOtpHash || !user.resetPasswordOtpExpiresAt) {
+        req.flash('error', genericError);
+        return res.redirect('/reset-password');
+      }
+
+      if (user.resetPasswordOtpExpiresAt <= new Date()) {
+        req.flash('error', genericError);
+        return res.redirect('/reset-password');
+      }
+
+      if ((user.resetPasswordOtpAttempts || 0) >= 5) {
+        req.flash('error', 'Terlalu banyak percobaan OTP. Silakan minta OTP baru.');
+        return res.redirect('/forgot-password');
+      }
+
+      const otpHash = crypto.createHash('sha256').update(String(otp || '').trim()).digest('hex');
+      if (otpHash !== user.resetPasswordOtpHash) {
+        user.resetPasswordOtpAttempts = (user.resetPasswordOtpAttempts || 0) + 1;
+        await user.save();
+        req.flash('error', genericError);
+        return res.redirect('/reset-password');
+      }
+
+      user.password = password;
+      user.resetPasswordOtpHash = undefined;
+      user.resetPasswordOtpExpiresAt = undefined;
+      user.resetPasswordOtpAttempts = 0;
+      await user.save();
+
+      req.flash('success', 'Password berhasil direset. Silakan login.');
+      res.redirect('/login');
+    } catch (err) {
+      console.error(err);
+      req.flash('error', 'Terjadi kesalahan saat reset password');
+      res.redirect('/forgot-password');
+    }
   }
 
   // Proses reset password

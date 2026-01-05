@@ -14,6 +14,12 @@ router.post('/register', authController.register);
 // Forgot / Reset password
 router.get('/forgot-password', authController.showForgotPassword);
 router.post('/forgot-password', authController.forgotPassword);
+
+// Reset password via OTP
+router.get('/reset-password', authController.showResetPasswordOtp);
+router.post('/reset-password', authController.resetPasswordOtp);
+
+// Legacy reset password via token
 router.get('/reset-password/:token', authController.showResetPassword);
 router.post('/reset-password/:token', authController.resetPassword);
 

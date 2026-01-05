@@ -59,7 +59,35 @@ async function sendPasswordResetEmail({ to, token }) {
   });
 }
 
+async function sendPasswordResetOtpEmail({ to, otp }) {
+  const transporter = createTransporter();
+  const baseUrl = getBaseUrl();
+  const resetPageUrl = `${baseUrl}/reset-password`;
+
+  const from = process.env.MAIL_FROM || process.env.GMAIL_USER;
+  const appName = process.env.APP_NAME || 'Sistem Komoditas';
+
+  await transporter.sendMail({
+    from: `${appName} <${from}>`,
+    to,
+    subject: `[${appName}] Kode OTP Reset Password`,
+    text:
+      `Anda meminta reset password.\n\n` +
+      `Kode OTP Anda (berlaku 10 menit): ${otp}\n\n` +
+      `Buka halaman reset password untuk memasukkan OTP:\n${resetPageUrl}\n\n` +
+      `Jika Anda tidak meminta reset password, abaikan email ini.`,
+    html:
+      `<p>Anda meminta reset password.</p>` +
+      `<p><strong>Kode OTP (berlaku 10 menit):</strong><br>` +
+      `<span style="font-size: 24px; letter-spacing: 4px; font-weight: 700;">${otp}</span></p>` +
+      `<p>Masukkan kode tersebut di halaman reset password:<br>` +
+      `<a href="${resetPageUrl}">${resetPageUrl}</a></p>` +
+      `<p>Jika Anda tidak meminta reset password, abaikan email ini.</p>`
+  });
+}
+
 module.exports = {
   sendPasswordResetEmail,
+  sendPasswordResetOtpEmail,
   getBaseUrl
 };
