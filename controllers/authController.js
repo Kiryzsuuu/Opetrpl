@@ -49,10 +49,15 @@ class AuthController {
       const { email, password } = req.body;
       const normalizedEmail = normalizeEmail(email);
 
-      const user = await User.findOne({ email: normalizedEmail, status: 'Aktif' });
+      const user = await User.findOne({ email: normalizedEmail });
       
       if (!user) {
         req.flash('error', 'Email atau password salah');
+        return res.redirect('/login');
+      }
+
+      if (user.status !== 'Aktif') {
+        req.flash('error', 'Akun Anda belum diaktivasi admin. Silakan tunggu atau hubungi admin.');
         return res.redirect('/login');
       }
 
@@ -113,12 +118,12 @@ class AuthController {
         nama,
         noTelepon,
         role: 'Petugas Lapangan',
-        status: 'Tidak Aktif' // Perlu aktivasi admin
+        // status default: 'Aktif'
       });
 
       await newUser.save();
 
-      req.flash('success', 'Registrasi berhasil! Silakan tunggu aktivasi dari admin.');
+      req.flash('success', 'Registrasi berhasil! Silakan login.');
       res.redirect('/login');
     } catch (err) {
       console.error(err);
