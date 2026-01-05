@@ -85,8 +85,7 @@ class PengemasanController {
           path: 'produksi',
           populate: { path: 'formulasi' }
         })
-        .populate('penanggungJawab', 'nama email')
-        .populate('auditTrail.pic', 'nama');
+        .populate('penanggungJawab', 'nama email');
       
       if (!pengemasan) {
         req.flash('error', 'Data pengemasan tidak ditemukan');

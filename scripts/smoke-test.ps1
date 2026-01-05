@@ -62,6 +62,35 @@ function Extract-FirstSelectValue([string]$html, [string]$selectName) {
   return $null
 }
 
+function Extract-SelectValues([string]$html, [string]$attrName, [string]$attrValue, [int]$max = 0) {
+  if (-not $html) { return @() }
+  $escapedName = [regex]::Escape($attrName)
+  $escapedValue = [regex]::Escape($attrValue)
+  $pattern = "<select[^>]*$escapedName=`"$escapedValue`"[^>]*>[\s\S]*?</select>"
+  $m = [regex]::Match($html, $pattern, [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
+  if (-not $m.Success) { return @() }
+
+  $selectHtml = $m.Value
+  $vals = @()
+  $optMatches = [regex]::Matches($selectHtml, '<option\s+value="([^"]+)"', [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
+  foreach ($om in $optMatches) {
+    $v = $om.Groups[1].Value
+    if ($v -and $v.Trim() -ne '') {
+      $vals += $v
+      if ($max -gt 0 -and $vals.Count -ge $max) { break }
+    }
+  }
+  return $vals
+}
+
+function Extract-SelectValuesByName([string]$html, [string]$selectName, [int]$max = 0) {
+  return Extract-SelectValues $html 'name' $selectName $max
+}
+
+function Extract-SelectValuesById([string]$html, [string]$selectId, [int]$max = 0) {
+  return Extract-SelectValues $html 'id' $selectId $max
+}
+
 Print ("SMOKE_BASE={0}" -f $base)
 
 Print "== 1) Check CSS =="
@@ -151,49 +180,142 @@ if ($doMutate) {
     try { $count = [int]$env:SMOKE_COUNT } catch { $count = 5 }
   }
 
-  # Produksi
-  $produksiNew = Get-PageNoThrow '/produksi/new' $session
-  if ($produksiNew.StatusCode -eq 200) {
-    $formulasiId = Extract-FirstSelectValue $produksiNew.Content 'formulasi'
-    if ($formulasiId) {
-      for ($i = 1; $i -le $count; $i++) {
-        $today = Get-Date
-        $kode = "SMK-PRD-$($today.ToString('yyyyMMdd'))-$i"
-        $batch = "BATCH-SMK-$i"
-        $peralatan = @(
-          @{ namaAlat = 'Mixer'; status = 'OK' },
-          @{ namaAlat = 'Timbangan Digital'; status = 'Kalibrasi' }
-        )
-        $start = $today.AddMinutes($i)
-        $proses = @(
-          @{ tahap = 'Persiapan'; waktuMulai = $start.ToString('o'); waktuSelesai = $start.AddMinutes(10).ToString('o'); pic = 'Andi'; catatan = 'Cek alat' },
-          @{ tahap = 'Mixing'; waktuMulai = $start.AddMinutes(10).ToString('o'); waktuSelesai = $start.AddMinutes(40).ToString('o'); pic = 'Budi'; catatan = 'Kecepatan sedang' }
-        )
+  $runId = (Get-Date).ToString('yyyyMMddHHmmss')
 
-        $body = @{
-          kodeProduksi = $kode
-          batchNumber = $batch
-          tanggalProduksi = $today.ToString('yyyy-MM-dd')
-          formulasi = $formulasiId
-          targetJumlah = '10'
-          targetSatuan = 'kg'
-          hasilJumlah = '9.8'
-          hasilSatuan = 'kg'
-          status = 'Perencanaan'
-          kualitas = 'A'
-          peralatan = ($peralatan | ConvertTo-Json -Compress)
-          prosesProduksi = ($proses | ConvertTo-Json -Compress)
-          catatan = 'smoke-test'
-        }
-
-        $r = Post-PageNoThrow '/produksi' $body $session
-        Print ("POST /produksi sample#{0} => {1}" -f $i, $r.StatusCode)
+  # Komoditas
+  $komNew = Get-PageNoThrow '/komoditas/new' $session
+  if ($komNew.StatusCode -eq 200) {
+    for ($i = 1; $i -le $count; $i++) {
+      $today = Get-Date
+      $kode = "SMK-KMD-$runId-$i"
+      $nama = "Komoditas Sample $i"
+      $kategori = @('Biji-bijian', 'Sayuran', 'Buah', 'Protein', 'Lainnya')[($i - 1) % 5]
+      $body = @{
+        kode = $kode
+        nama = $nama
+        kategori = $kategori
+        satuan = 'kg'
+        hargaPerSatuan = (10000 * $i)
+        stok = (10 * $i)
+        supplier = 'Supplier Demo'
+        status = 'Tersedia'
+        deskripsi = 'seed sample'
+        tanggalMasuk = $today.ToString('yyyy-MM-dd')
       }
-    } else {
-      Print "SKIP Produksi: tidak ada opsi formulasi di /produksi/new"
+      $r = Post-PageNoThrow '/komoditas' $body $session
+      Print ("POST /komoditas sample#{0} => {1}" -f $i, $r.StatusCode)
     }
   } else {
-    Print ("SKIP Produksi: GET /produksi/new => {0}" -f $produksiNew.StatusCode)
+    Print ("SKIP Komoditas: GET /komoditas/new => {0}" -f $komNew.StatusCode)
+  }
+
+  # Formulasi
+  $frmNew = Get-PageNoThrow '/formulasi/new' $session
+  $komoditasIds = Extract-SelectValuesById $frmNew.Content 'komoditasId'
+  if ($frmNew.StatusCode -eq 200 -and $komoditasIds.Count -gt 0) {
+    for ($i = 1; $i -le $count; $i++) {
+      $kode = "SMK-FRM-$runId-$i"
+      $nama = "Formulasi Sample $i"
+      $komA = $komoditasIds[($i - 1) % $komoditasIds.Count]
+      $komB = $komoditasIds[($i) % $komoditasIds.Count]
+      $komposisi = @(
+        @{ komoditas = $komA; jumlah = (1 + $i); satuan = 'kg' },
+        @{ komoditas = $komB; jumlah = (0.5 + ($i * 0.1)); satuan = 'kg' }
+      )
+
+      $body = @{
+        kode = $kode
+        nama = $nama
+        kategoriProduk = 'Produk Demo'
+        estimasiWaktuProduksi = '2 jam'
+        deskripsi = 'seed sample'
+        caraProduksi = 'Campur bahan, aduk rata, kemudian proses sesuai SOP.'
+        'targetHasil[jumlah]' = '10'
+        'targetHasil[satuan]' = 'kg'
+        status = 'Disetujui'
+        komposisi = ($komposisi | ConvertTo-Json -Compress)
+      }
+      $r = Post-PageNoThrow '/formulasi' $body $session
+      Print ("POST /formulasi sample#{0} => {1}" -f $i, $r.StatusCode)
+    }
+  } else {
+    Print "SKIP Formulasi: tidak ada komoditas tersedia di /formulasi/new"
+  }
+
+  # Analisis Gizi
+  $agNew = Get-PageNoThrow '/analisis-gizi/new' $session
+  $formulasiIds = Extract-SelectValuesByName $agNew.Content 'formulasi'
+  if ($agNew.StatusCode -eq 200 -and $formulasiIds.Count -gt 0) {
+    for ($i = 1; $i -le $count; $i++) {
+      $today = Get-Date
+      $fid = $formulasiIds[($i - 1) % $formulasiIds.Count]
+      $body = @{
+        formulasi = $fid
+        tanggalAnalisis = $today.AddDays(-$i).ToString('yyyy-MM-dd')
+        kalori = (120 + ($i * 10))
+        protein = (5 + $i)
+        lemak = (2 + ($i * 0.5))
+        karbohidrat = (20 + ($i * 2))
+        serat = (2 + ($i * 0.2))
+        gula = (3 + ($i * 0.3))
+        natrium = (100 + ($i * 15))
+        vitaminA = (10 + ($i * 2))
+        vitaminC = (8 + ($i * 1))
+        kalsium = (50 + ($i * 5))
+        zatBesi = (4 + ($i * 0.4))
+        metodePengujian = 'Perhitungan dan uji lab standar'
+        status = 'Selesai'
+        catatan = 'seed sample'
+        kesimpulan = 'Sesuai target'
+        rekomendasi = 'Lanjut ke tahap berikutnya'
+      }
+      $r = Post-PageNoThrow '/analisis-gizi' $body $session
+      Print ("POST /analisis-gizi sample#{0} => {1}" -f $i, $r.StatusCode)
+    }
+  } else {
+    Print "SKIP Analisis Gizi: tidak ada formulasi tersedia di /analisis-gizi/new"
+  }
+
+  # Produksi (status Selesai agar bisa dipakai Pengemasan/Distribusi)
+  $produksiNew = Get-PageNoThrow '/produksi/new' $session
+  $formulasiForProduksi = Extract-SelectValuesByName $produksiNew.Content 'formulasi'
+  if ($produksiNew.StatusCode -eq 200 -and $formulasiForProduksi.Count -gt 0) {
+    for ($i = 1; $i -le $count; $i++) {
+      $today = Get-Date
+      $fid = $formulasiForProduksi[($i - 1) % $formulasiForProduksi.Count]
+      $kode = "SMK-PRD-$runId-$i"
+      $batch = "BATCH-SMK-$runId-$i"
+      $peralatan = @(
+        @{ namaAlat = 'Mixer'; status = 'OK' },
+        @{ namaAlat = 'Timbangan Digital'; status = 'Kalibrasi' }
+      )
+      $start = $today.AddMinutes($i)
+      $proses = @(
+        @{ tahap = 'Persiapan'; waktuMulai = $start.ToString('o'); waktuSelesai = $start.AddMinutes(10).ToString('o'); pic = 'Andi'; catatan = 'Cek alat' },
+        @{ tahap = 'Mixing'; waktuMulai = $start.AddMinutes(10).ToString('o'); waktuSelesai = $start.AddMinutes(40).ToString('o'); pic = 'Budi'; catatan = 'Kecepatan sedang' }
+      )
+
+      $body = @{
+        kodeProduksi = $kode
+        batchNumber = $batch
+        tanggalProduksi = $today.AddDays(-$i).ToString('yyyy-MM-dd')
+        formulasi = $fid
+        targetJumlah = '10'
+        targetSatuan = 'kg'
+        hasilJumlah = '9.8'
+        hasilSatuan = 'kg'
+        status = 'Selesai'
+        kualitas = 'A'
+        peralatan = ($peralatan | ConvertTo-Json -Compress)
+        prosesProduksi = ($proses | ConvertTo-Json -Compress)
+        catatan = 'seed sample'
+      }
+
+      $r = Post-PageNoThrow '/produksi' $body $session
+      Print ("POST /produksi sample#{0} => {1}" -f $i, $r.StatusCode)
+    }
+  } else {
+    Print "SKIP Produksi: tidak ada formulasi Disetujui di /produksi/new"
   }
 
   # Uji Lab
@@ -231,42 +353,91 @@ if ($doMutate) {
 
   # Pengemasan
   $pkNew = Get-PageNoThrow '/pengemasan/new' $session
-  if ($pkNew.StatusCode -eq 200) {
-    $produksiId = Extract-FirstSelectValue $pkNew.Content 'produksi'
-    if ($produksiId) {
-      for ($i = 1; $i -le $count; $i++) {
-        $today = Get-Date
-        $sert = @(
-          @{ jenisSertifikat = 'BPOM'; nomorSertifikat = "MD-000$i"; tanggalBerlaku = $today.ToString('yyyy-MM-dd') }
-        )
-        $audit = @(
-          @{ tanggal = $today.ToString('yyyy-MM-dd'); aktivitas = 'QC'; pic = 'admin'; hasil = 'OK' }
-        )
-        $body = @{
-          produksi = $produksiId
-          tanggalKemas = $today.ToString('yyyy-MM-dd')
-          jenisPengemas = 'Pouch'
-          jumlahKemasan = '10'
-          ukuranKemasan = '250g'
-          beratPerKemasan = '0.25'
-          nomorBatch = "PK-SMK-$i"
-          tanggalKadaluarsa = $today.AddMonths(6).ToString('yyyy-MM-dd')
-          status = 'Pending'
-          standarKeamanan = 'HACCP'
-          labelNutrisi = 'true'
-          labelHalal = 'true'
-          sertifikasiKeamanan = ($sert | ConvertTo-Json -Compress)
-          auditTrail = ($audit | ConvertTo-Json -Compress)
-          catatan = 'smoke-test'
-        }
-        $r = Post-PageNoThrow '/pengemasan' $body $session
-        Print ("POST /pengemasan sample#{0} => {1}" -f $i, $r.StatusCode)
+  $produksiIdsForPack = Extract-SelectValuesByName $pkNew.Content 'produksi'
+  if ($pkNew.StatusCode -eq 200 -and $produksiIdsForPack.Count -gt 0) {
+    for ($i = 1; $i -le $count; $i++) {
+      $today = Get-Date
+      $pid = $produksiIdsForPack[($i - 1) % $produksiIdsForPack.Count]
+      $sert = @(
+        @{ jenisSertifikat = 'BPOM'; nomorSertifikat = "MD-$runId-$i"; tanggalBerlaku = $today.ToString('yyyy-MM-dd') }
+      )
+      $audit = @(
+        @{ tanggal = $today.ToString('yyyy-MM-dd'); aktivitas = 'QC'; hasil = 'OK' }
+      )
+      $body = @{
+        produksi = $pid
+        tanggalKemas = $today.ToString('yyyy-MM-dd')
+        jenisPengemas = 'Pouch'
+        jumlahKemasan = '10'
+        ukuranKemasan = '250g'
+        beratPerKemasan = '0.25'
+        nomorBatch = "PK-SMK-$runId-$i"
+        tanggalKadaluarsa = $today.AddMonths(6).ToString('yyyy-MM-dd')
+        status = 'Selesai'
+        standarKeamanan = 'HACCP'
+        labelNutrisi = 'true'
+        labelHalal = 'true'
+        sertifikasiKeamanan = ($sert | ConvertTo-Json -Compress)
+        auditTrail = ($audit | ConvertTo-Json -Compress)
+        catatan = 'seed sample'
       }
-    } else {
-      Print "SKIP Pengemasan: tidak ada opsi produksi di /pengemasan/new (butuh Produksi status Selesai)"
+      $r = Post-PageNoThrow '/pengemasan' $body $session
+      Print ("POST /pengemasan sample#{0} => {1}" -f $i, $r.StatusCode)
     }
   } else {
-    Print ("SKIP Pengemasan: GET /pengemasan/new => {0}" -f $pkNew.StatusCode)
+    Print "SKIP Pengemasan: tidak ada produksi status Selesai di /pengemasan/new"
+  }
+
+  # Distribusi
+  $distNew = Get-PageNoThrow '/distribusi/new' $session
+  $produksiIdsForDist = Extract-SelectValuesByName $distNew.Content 'produksi'
+  if ($distNew.StatusCode -eq 200 -and $produksiIdsForDist.Count -gt 0) {
+    for ($i = 1; $i -le $count; $i++) {
+      $today = Get-Date
+      $pid = $produksiIdsForDist[($i - 1) % $produksiIdsForDist.Count]
+      $kode = "SMK-DST-$runId-$i"
+      $body = @{
+        kodeDistribusi = $kode
+        produksi = $pid
+        tanggalDistribusi = $today.ToString('yyyy-MM-dd')
+        jumlahProduk = '10'
+        satuan = 'pcs'
+        tujuanNama = 'Puskesmas Contoh'
+        tujuanKontak = '08123456789'
+        tujuanAlamat = 'Jl. Contoh No. 1'
+        tujuanKota = 'Kota Demo'
+        tujuanProvinsi = 'Jawa Barat'
+        tujuanKodePos = '40111'
+        penerimaNama = 'Ibu Sari'
+        penerimaJabatan = 'Petugas'
+        penerimaKontak = '08120000000'
+        kurirNama = 'Kurir Demo'
+        kurirNoKendaraan = 'D 1234 ABC'
+        kurirKontak = '08129999999'
+        estimasiSampai = $today.AddDays(1).ToString('yyyy-MM-dd')
+        tanggalSampai = ''
+        status = 'Persiapan'
+        catatan = 'seed sample'
+      }
+      $r = Post-PageNoThrow '/distribusi' $body $session
+      Print ("POST /distribusi sample#{0} => {1}" -f $i, $r.StatusCode)
+    }
+  } else {
+    Print "SKIP Distribusi: tidak ada produksi status Selesai di /distribusi/new"
+  }
+
+  # Laporan (5 contoh generate)
+  $reportKinds = @('ringkasan','komoditas','formulasi','produksi','distribusi')
+  $idx = 1
+  foreach ($k in $reportKinds) {
+    $body = @{
+      jenisLaporan = $k
+      tanggalMulai = ''
+      tanggalAkhir = ''
+    }
+    $r = Post-PageNoThrow '/laporan/generate' $body $session
+    Print ("POST /laporan/generate ({0}) => {1}" -f $k, $r.StatusCode)
+    $idx++
   }
 } else {
   Print "== 7) Skip create-form smoke test (set SMOKE_MUTATE=1 to enable) =="

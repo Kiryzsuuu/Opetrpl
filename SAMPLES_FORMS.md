@@ -40,3 +40,40 @@ Catatan:
 3. Tanggal: `2026-01-05` — Aktivitas: `Label Check` — PIC: `admin` — Hasil: `OK`
 4. Tanggal: `2026-01-05` — Aktivitas: `Sealing Check` — PIC: `admin` — Hasil: `OK`
 5. Tanggal: `2026-01-05` — Aktivitas: `Final Packing` — PIC: `admin` — Hasil: `OK`
+
+## 6) Komoditas (5 contoh)
+1. Kode: `KMD001` — Nama: `Beras Organik` — Kategori: `Biji-bijian` — Satuan: `kg` — Harga: `15000` — Stok: `100` — Supplier: `Tani Sejahtera` — Status: `Tersedia`
+2. Kode: `KMD002` — Nama: `Wortel` — Kategori: `Sayuran` — Satuan: `kg` — Harga: `12000` — Stok: `50` — Supplier: `Kebun Makmur` — Status: `Tersedia`
+3. Kode: `KMD003` — Nama: `Pisang` — Kategori: `Buah` — Satuan: `kg` — Harga: `18000` — Stok: `40` — Supplier: `Buah Nusantara` — Status: `Tersedia`
+4. Kode: `KMD004` — Nama: `Susu Bubuk` — Kategori: `Protein` — Satuan: `kg` — Harga: `75000` — Stok: `20` — Supplier: `Dairy Indo` — Status: `Pre-Order`
+5. Kode: `KMD005` — Nama: `Garam` — Kategori: `Lainnya` — Satuan: `kg` — Harga: `8000` — Stok: `30` — Supplier: `Garam Jaya` — Status: `Tersedia`
+
+## 7) Formulasi Pangan (5 contoh)
+Catatan: Formulasi butuh Komposisi (pakai tombol "Tambah ke Komposisi").
+1. Kode: `FRM001` — Nama: `Bubur Bayi Beras` — Kategori Produk: `Makanan Bayi` — Status: `Disetujui` — Komposisi: `Beras Organik 2 kg, Susu Bubuk 0.5 kg` — Cara Produksi: `Mixing + pemanasan`
+2. Kode: `FRM002` — Nama: `Bubur Pisang` — Kategori Produk: `Makanan Bayi` — Status: `Disetujui` — Komposisi: `Pisang 1.5 kg, Beras Organik 1 kg` — Cara Produksi: `Blending + pemanasan`
+3. Kode: `FRM003` — Nama: `Puree Wortel` — Kategori Produk: `MPASI` — Status: `Disetujui` — Komposisi: `Wortel 2 kg, Garam 0.05 kg` — Cara Produksi: `Steam + blending`
+4. Kode: `FRM004` — Nama: `Bubur Kombo` — Kategori Produk: `MPASI` — Status: `Disetujui` — Komposisi: `Beras 1.5 kg, Wortel 0.5 kg` — Cara Produksi: `Mixing`
+5. Kode: `FRM005` — Nama: `Bubur Protein` — Kategori Produk: `MPASI` — Status: `Disetujui` — Komposisi: `Susu Bubuk 0.7 kg, Beras 1.3 kg` — Cara Produksi: `Mixing`
+
+## 8) Analisis Gizi (5 contoh)
+1. Formulasi: `FRM001` — Kalori: `150` — Protein: `7` — Lemak: `3` — Karbohidrat: `25` — Serat: `2` — Gula: `4` — Natrium: `120` — Status: `Selesai`
+2. Formulasi: `FRM002` — Kalori: `160` — Protein: `6` — Lemak: `4` — Karbohidrat: `28` — Serat: `2.5` — Gula: `6` — Natrium: `110` — Status: `Selesai`
+3. Formulasi: `FRM003` — Kalori: `140` — Protein: `5` — Lemak: `2.5` — Karbohidrat: `24` — Serat: `3` — Gula: `5` — Natrium: `90` — Status: `Selesai`
+4. Formulasi: `FRM004` — Kalori: `155` — Protein: `6.5` — Lemak: `3.2` — Karbohidrat: `26` — Serat: `2.2` — Gula: `4.2` — Natrium: `100` — Status: `Selesai`
+5. Formulasi: `FRM005` — Kalori: `170` — Protein: `8` — Lemak: `4.5` — Karbohidrat: `29` — Serat: `2` — Gula: `4` — Natrium: `130` — Status: `Selesai`
+
+## 9) Distribusi (5 contoh)
+Catatan: Distribusi butuh Produksi status `Selesai`.
+1. Kode Distribusi: `DST001` — Produksi: `PRD001` — Tanggal: `2026-01-05` — Tujuan: `Puskesmas A (Kota Demo)` — Jumlah: `10 pcs` — Status: `Persiapan`
+2. Kode Distribusi: `DST002` — Produksi: `PRD002` — Tanggal: `2026-01-06` — Tujuan: `Posyandu B (Kota Demo)` — Jumlah: `12 pcs` — Status: `Dalam Perjalanan`
+3. Kode Distribusi: `DST003` — Produksi: `PRD003` — Tanggal: `2026-01-07` — Tujuan: `Klinik C (Kota Demo)` — Jumlah: `8 pcs` — Status: `Sampai`
+4. Kode Distribusi: `DST004` — Produksi: `PRD004` — Tanggal: `2026-01-08` — Tujuan: `Puskesmas D (Kota Demo)` — Jumlah: `15 pcs` — Status: `Persiapan`
+5. Kode Distribusi: `DST005` — Produksi: `PRD005` — Tanggal: `2026-01-09` — Tujuan: `Posyandu E (Kota Demo)` — Jumlah: `9 pcs` — Status: `Persiapan`
+
+## 10) Laporan (5 contoh yang bisa dicoba)
+1. Jenis Laporan: `ringkasan` (tanpa tanggal)
+2. Jenis Laporan: `komoditas` (tanpa tanggal)
+3. Jenis Laporan: `formulasi` (tanpa tanggal)
+4. Jenis Laporan: `produksi` (tanpa tanggal)
+5. Jenis Laporan: `distribusi` (tanpa tanggal)

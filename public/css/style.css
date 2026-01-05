@@ -531,6 +531,32 @@ main .btn-primary {
   background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
 }
 
+/* Make the 3-dots "Aksi Lain" button always visible (grey) and disable hover animation */
+main .btn-actions-more {
+  color: #6c757d !important;
+  background: #e9ecef !important;
+  border: 1px solid #ced4da !important;
+  transition: none !important;
+}
+
+main .btn-actions-more:hover,
+main .btn-actions-more:focus,
+main .btn-actions-more:active {
+  color: #6c757d !important;
+  background: #e9ecef !important;
+  border: 1px solid #ced4da !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+main .btn-actions-more::after {
+  display: none !important;
+}
+
+main .btn-actions-more i {
+  margin-right: 0 !important;
+}
+
 /* ===== Responsive ===== */
 @media (max-width: 992px) {
   .sidebar {

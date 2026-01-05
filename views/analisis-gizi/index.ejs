@@ -107,19 +107,26 @@
     <script type="application/json" id="giziData"><%- JSON.stringify(items.map(function (it) {
       return {
         tanggal: it.tanggalAnalisis ? new Date(it.tanggalAnalisis).toISOString().slice(0, 10) : '',
+        kodeFormulasi: (it.formulasi && it.formulasi.kode) ? it.formulasi.kode : '',
         kalori: (it.analisis && it.analisis.kalori != null) ? it.analisis.kalori : 0,
         protein: (it.analisis && it.analisis.protein != null) ? it.analisis.protein : 0,
         lemak: (it.analisis && it.analisis.lemak != null) ? it.analisis.lemak : 0,
-        karbohidrat: (it.analisis && it.analisis.karbohidrat != null) ? it.analisis.karbohidrat : 0
+        karbohidrat: (it.analisis && it.analisis.karbohidrat != null) ? it.analisis.karbohidrat : 0,
+        serat: (it.analisis && it.analisis.serat != null) ? it.analisis.serat : 0,
+        gula: (it.analisis && it.analisis.gula != null) ? it.analisis.gula : 0,
+        natrium: (it.analisis && it.analisis.natrium != null) ? it.analisis.natrium : 0
       };
     })) %></script>
     <script>
       (function () {
         const el = document.getElementById('giziData');
-        const raw = el ? JSON.parse(el.textContent || '[]') : [];
+        let raw = el ? JSON.parse(el.textContent || '[]') : [];
         raw.sort((a, b) => (a.tanggal > b.tanggal ? 1 : a.tanggal < b.tanggal ? -1 : 0));
 
-        const labels = raw.map(r => r.tanggal);
+        // keep chart readable
+        if (raw.length > 12) raw = raw.slice(raw.length - 12);
+
+        const labels = raw.map(r => (r.kodeFormulasi ? `${r.tanggal} • ${r.kodeFormulasi}` : r.tanggal));
         const ctx = document.getElementById('giziChart');
         if (!ctx) return;
 
@@ -131,7 +138,10 @@
               { label: 'Kalori', data: raw.map(r => r.kalori), borderWidth: 2, tension: 0.25 },
               { label: 'Protein', data: raw.map(r => r.protein), borderWidth: 2, tension: 0.25 },
               { label: 'Lemak', data: raw.map(r => r.lemak), borderWidth: 2, tension: 0.25 },
-              { label: 'Karbohidrat', data: raw.map(r => r.karbohidrat), borderWidth: 2, tension: 0.25 }
+              { label: 'Karbohidrat', data: raw.map(r => r.karbohidrat), borderWidth: 2, tension: 0.25 },
+              { label: 'Serat', data: raw.map(r => r.serat), borderWidth: 2, tension: 0.25 },
+              { label: 'Gula', data: raw.map(r => r.gula), borderWidth: 2, tension: 0.25 },
+              { label: 'Natrium', data: raw.map(r => r.natrium), borderWidth: 2, tension: 0.25 }
             ]
           },
           options: {

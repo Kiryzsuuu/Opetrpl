@@ -39,10 +39,7 @@ const pengemasanSchema = new mongoose.Schema({
   auditTrail: [{
     tanggal: Date,
     aktivitas: String,
-    pic: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    },
+    pic: String,
     hasil: String
   }],
   catatan: String,
