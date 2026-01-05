@@ -11,6 +11,11 @@ const { injectUser, injectNotifications } = require('./middleware/auth');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const SESSION_SECRET = process.env.SESSION_SECRET || 'dev-session-secret-change-me';
+if (!process.env.SESSION_SECRET) {
+  console.warn('[WARN] SESSION_SECRET belum diset. Set SESSION_SECRET di environment (Vercel).');
+}
+
 // Connect to MongoDB
 connectDB();
 
@@ -31,7 +36,7 @@ if (process.env.NODE_ENV === 'production') {
 
 // Session configuration
 app.use(session({
-  secret: process.env.SESSION_SECRET,
+  secret: SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({
