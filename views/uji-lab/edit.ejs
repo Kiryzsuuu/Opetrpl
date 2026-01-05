@@ -55,13 +55,12 @@
 
       <div class="col-12">
         <label class="form-label">Parameter Uji (JSON)</label>
-        <textarea name="parameterUji" class="form-control font-monospace" rows="8" spellcheck="false" autocapitalize="off" autocomplete="off"><%=
+        <textarea name="parameterUji" class="form-control font-monospace" rows="8" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder='[{"parameter":"TPC","nilai":"1","satuan":"CFU","status":"Lulus"}]'><%=
           Array.isArray(ujiLab.parameterUji)
-            ? (ujiLab.parameterUji.length
-              ? JSON.stringify(ujiLab.parameterUji, null, 2)
-              : JSON.stringify([{ parameter: '', nilai: '', satuan: '', status: 'Pending' }], null, 2))
-            : (String(ujiLab.parameterUji || '').trim() || JSON.stringify([{ parameter: '', nilai: '', satuan: '', status: 'Pending' }], null, 2))
+            ? (ujiLab.parameterUji.length ? JSON.stringify(ujiLab.parameterUji, null, 2) : '')
+            : (String(ujiLab.parameterUji || '').trim() || '')
         %></textarea>
+        <div class="form-text">Isi sebagai array JSON. Jika tidak ada, kosongkan atau isi <span class="font-monospace">[]</span>. Contoh: <span class="font-monospace">[{"parameter":"TPC","nilai":"1","satuan":"CFU","status":"Lulus"}]</span></div>
       </div>
 
       <div class="col-12"><label class="form-label">Catatan</label><textarea name="catatan" class="form-control" rows="2"><%= ujiLab.catatan || '' %></textarea></div>

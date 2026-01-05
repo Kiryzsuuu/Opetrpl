@@ -73,24 +73,22 @@
 
       <div class="col-12">
         <label class="form-label">Peralatan (JSON)</label>
-        <textarea name="peralatan" class="form-control font-monospace" rows="6" spellcheck="false" autocapitalize="off" autocomplete="off"><%=
+        <textarea name="peralatan" class="form-control font-monospace" rows="6" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder='[{"namaAlat":"Mixer","status":"OK"}]'><%=
           Array.isArray(produksi.peralatan)
-            ? (produksi.peralatan.length
-              ? JSON.stringify(produksi.peralatan, null, 2)
-              : JSON.stringify([{ namaAlat: '', status: 'OK' }], null, 2))
-            : (String(produksi.peralatan || '').trim() || JSON.stringify([{ namaAlat: '', status: 'OK' }], null, 2))
+            ? (produksi.peralatan.length ? JSON.stringify(produksi.peralatan, null, 2) : '')
+            : (String(produksi.peralatan || '').trim() || '')
         %></textarea>
+        <div class="form-text">Isi sebagai array JSON. Jika tidak ada, kosongkan atau isi <span class="font-monospace">[]</span>. Contoh: <span class="font-monospace">[{"namaAlat":"Mixer","status":"OK"}]</span></div>
       </div>
 
       <div class="col-12">
         <label class="form-label">Proses Produksi (JSON)</label>
-        <textarea name="prosesProduksi" class="form-control font-monospace" rows="9" spellcheck="false" autocapitalize="off" autocomplete="off"><%=
+        <textarea name="prosesProduksi" class="form-control font-monospace" rows="9" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder='[{"tahap":"Mixing","waktuMulai":"2025-01-01T08:00:00Z","waktuSelesai":"2025-01-01T09:00:00Z","pic":"Nama","catatan":"..."}]'><%=
           Array.isArray(produksi.prosesProduksi)
-            ? (produksi.prosesProduksi.length
-              ? JSON.stringify(produksi.prosesProduksi, null, 2)
-              : JSON.stringify([{ tahap: '', waktuMulai: '', waktuSelesai: '', pic: '', catatan: '' }], null, 2))
-            : (String(produksi.prosesProduksi || '').trim() || JSON.stringify([{ tahap: '', waktuMulai: '', waktuSelesai: '', pic: '', catatan: '' }], null, 2))
+            ? (produksi.prosesProduksi.length ? JSON.stringify(produksi.prosesProduksi, null, 2) : '')
+            : (String(produksi.prosesProduksi || '').trim() || '')
         %></textarea>
+        <div class="form-text">Isi sebagai array JSON. Gunakan format waktu ISO (contoh <span class="font-monospace">2025-01-01T08:00:00Z</span>). Jika tidak ada, kosongkan atau isi <span class="font-monospace">[]</span>.</div>
       </div>
 
       <div class="col-12"><label class="form-label">Catatan</label><textarea name="catatan" class="form-control" rows="3"><%= produksi.catatan || '' %></textarea></div>

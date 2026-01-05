@@ -74,27 +74,14 @@
 
       <div class="col-12">
         <label class="form-label">Sertifikasi Keamanan (JSON)</label>
-        <textarea name="sertifikasiKeamanan" class="form-control font-monospace" rows="6" spellcheck="false" autocapitalize="off" autocomplete="off">[
-  {
-    "jenisSertifikat": "",
-    "nomorSertifikat": "",
-    "tanggalBerlaku": ""
-  }
-]</textarea>
-        <div class="form-text">Format: [{"jenisSertifikat":"BPOM","nomorSertifikat":"...","tanggalBerlaku":"2025-01-01"}]</div>
+        <textarea name="sertifikasiKeamanan" class="form-control font-monospace" rows="6" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder='[{"jenisSertifikat":"BPOM","nomorSertifikat":"...","tanggalBerlaku":"2025-01-01"}]'></textarea>
+        <div class="form-text">Isi sebagai array JSON. Jika tidak ada, kosongkan atau isi <span class="font-monospace">[]</span>. Contoh: <span class="font-monospace">[{"jenisSertifikat":"BPOM","nomorSertifikat":"...","tanggalBerlaku":"2025-01-01"}]</span></div>
       </div>
 
       <div class="col-12">
         <label class="form-label">Audit Trail (JSON)</label>
-        <textarea name="auditTrail" class="form-control font-monospace" rows="7" spellcheck="false" autocapitalize="off" autocomplete="off">[
-  {
-    "tanggal": "",
-    "aktivitas": "",
-    "pic": "",
-    "hasil": ""
-  }
-]</textarea>
-        <div class="form-text">Format: [{"tanggal":"2025-01-01","aktivitas":"QC","pic":"USER_ID","hasil":"OK"}]</div>
+        <textarea name="auditTrail" class="form-control font-monospace" rows="7" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder='[{"tanggal":"2025-01-01","aktivitas":"QC","pic":"USER_ID","hasil":"OK"}]'></textarea>
+        <div class="form-text">Isi sebagai array JSON. Jika tidak ada, kosongkan atau isi <span class="font-monospace">[]</span>. Contoh: <span class="font-monospace">[{"tanggal":"2025-01-01","aktivitas":"QC","pic":"USER_ID","hasil":"OK"}]</span></div>
       </div>
 
       <div class="col-12"><label class="form-label">Catatan</label><textarea name="catatan" class="form-control" rows="3"></textarea></div>
