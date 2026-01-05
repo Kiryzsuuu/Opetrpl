@@ -519,8 +519,13 @@ main p, main .card-text {
   color: #333 !important;
 }
 
-main .btn {
-  color: white !important;
+/*
+  FIX tombol yang terlihat “kosong” (border ada, tapi teks/ikon tidak terlihat):
+  dulu ada rule yang memaksa warna teks tombol jadi putih di <main>.
+  Ini bikin tombol outline (bg transparan) jadi putih di atas bg putih.
+*/
+main .btn[class*="btn-outline-"] {
+  color: var(--bs-btn-color) !important;
 }
 
 main .btn-success {

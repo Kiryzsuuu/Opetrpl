@@ -91,6 +91,23 @@ function Extract-SelectValuesById([string]$html, [string]$selectId, [int]$max = 
   return Extract-SelectValues $html 'id' $selectId $max
 }
 
+function Extract-MongoIdsFromLinks([string]$html, [string]$resourcePath, [int]$max = 0) {
+  if (-not $html) { return @() }
+  $escaped = [regex]::Escape($resourcePath)
+  # matches href="/resource/<24hex>" or href="/resource/<24hex>/edit" etc
+  $pattern = ('href="{0}([a-f0-9]{{24}})' -f $escaped)
+  $matches = [regex]::Matches($html, $pattern, [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
+  $vals = New-Object System.Collections.Generic.List[string]
+  foreach ($m in $matches) {
+    $id = $m.Groups[1].Value
+    if ($id -and -not $vals.Contains($id)) {
+      $vals.Add($id)
+      if ($max -gt 0 -and $vals.Count -ge $max) { break }
+    }
+  }
+  return $vals.ToArray()
+}
+
 Print ("SMOKE_BASE={0}" -f $base)
 
 Print "== 1) Check CSS =="
@@ -144,7 +161,8 @@ Print "== 5) Check Chart.js markers on Analisis Gizi index =="
 $ag = Get-PageNoThrow '/analisis-gizi' $session
 $hasChart = $ag.Content -match 'chart\.umd\.min\.js'
 $hasCanvas = $ag.Content -match 'id="giziChart"'
-Print "Analisis Gizi: status=$($ag.StatusCode) chartJs:$hasChart canvas:$hasCanvas"
+$hasEmpty = $ag.Content -match 'Belum ada data analisis gizi'
+Print "Analisis Gizi: status=$($ag.StatusCode) empty:$hasEmpty chartJs:$hasChart canvas:$hasCanvas"
 
 Print "== 6) Smoke test CSV exports (should be 200) =="
 $csvPaths = @(
@@ -209,9 +227,18 @@ if ($doMutate) {
     Print ("SKIP Komoditas: GET /komoditas/new => {0}" -f $komNew.StatusCode)
   }
 
+  # Re-fetch Komoditas IDs from index (more robust than parsing /formulasi/new)
+  $komIndex = Get-PageNoThrow '/komoditas' $session
+  $komoditasIds = Extract-MongoIdsFromLinks $komIndex.Content '/komoditas/'
+  Print ("Komoditas IDs found: {0}" -f $komoditasIds.Count)
+
   # Formulasi
   $frmNew = Get-PageNoThrow '/formulasi/new' $session
-  $komoditasIds = Extract-SelectValuesById $frmNew.Content 'komoditasId'
+  $frmHasForm = ($frmNew.Content -match 'action="/formulasi"')
+  if ($frmNew.StatusCode -eq 200 -and -not $frmHasForm) {
+    Print "WARN Formulasi: /formulasi/new tidak berisi form action=\"/formulasi\" (mungkin beda versi/role/view)"
+  }
+
   if ($frmNew.StatusCode -eq 200 -and $komoditasIds.Count -gt 0) {
     for ($i = 1; $i -le $count; $i++) {
       $kode = "SMK-FRM-$runId-$i"
@@ -239,13 +266,24 @@ if ($doMutate) {
       Print ("POST /formulasi sample#{0} => {1}" -f $i, $r.StatusCode)
     }
   } else {
-    Print "SKIP Formulasi: tidak ada komoditas tersedia di /formulasi/new"
+    if ($komoditasIds.Count -eq 0) {
+      Print "SKIP Formulasi: tidak ada komoditas ID terdeteksi di /komoditas (cek role/seed komoditas)"
+    } else {
+      Print "SKIP Formulasi: GET /formulasi/new gagal"
+    }
   }
+
+  # Re-fetch Formulasi IDs from index
+  $frmIndex = Get-PageNoThrow '/formulasi' $session
+  $formulasiIds = Extract-MongoIdsFromLinks $frmIndex.Content '/formulasi/'
+  Print ("Formulasi IDs found: {0}" -f $formulasiIds.Count)
 
   # Analisis Gizi
   $agNew = Get-PageNoThrow '/analisis-gizi/new' $session
-  $formulasiIds = Extract-SelectValuesByName $agNew.Content 'formulasi'
-  if ($agNew.StatusCode -eq 200 -and $formulasiIds.Count -gt 0) {
+  if ($agNew.StatusCode -ne 200) {
+    Print ("WARN Analisis Gizi: GET /analisis-gizi/new => {0} (role?)" -f $agNew.StatusCode)
+  }
+  if ($formulasiIds.Count -gt 0) {
     for ($i = 1; $i -le $count; $i++) {
       $today = Get-Date
       $fid = $formulasiIds[($i - 1) % $formulasiIds.Count]
@@ -273,13 +311,16 @@ if ($doMutate) {
       Print ("POST /analisis-gizi sample#{0} => {1}" -f $i, $r.StatusCode)
     }
   } else {
-    Print "SKIP Analisis Gizi: tidak ada formulasi tersedia di /analisis-gizi/new"
+    Print "SKIP Analisis Gizi: tidak ada formulasi ID terdeteksi di /formulasi"
   }
 
   # Produksi (status Selesai agar bisa dipakai Pengemasan/Distribusi)
   $produksiNew = Get-PageNoThrow '/produksi/new' $session
-  $formulasiForProduksi = Extract-SelectValuesByName $produksiNew.Content 'formulasi'
-  if ($produksiNew.StatusCode -eq 200 -and $formulasiForProduksi.Count -gt 0) {
+  if ($produksiNew.StatusCode -ne 200) {
+    Print ("WARN Produksi: GET /produksi/new => {0} (role?)" -f $produksiNew.StatusCode)
+  }
+  $formulasiForProduksi = $formulasiIds
+  if ($formulasiForProduksi.Count -gt 0) {
     for ($i = 1; $i -le $count; $i++) {
       $today = Get-Date
       $fid = $formulasiForProduksi[($i - 1) % $formulasiForProduksi.Count]
@@ -315,13 +356,21 @@ if ($doMutate) {
       Print ("POST /produksi sample#{0} => {1}" -f $i, $r.StatusCode)
     }
   } else {
-    Print "SKIP Produksi: tidak ada formulasi Disetujui di /produksi/new"
+    Print "SKIP Produksi: tidak ada formulasi ID terdeteksi di /formulasi"
   }
+
+  # Re-fetch Produksi IDs from index (for Pengemasan/Distribusi)
+  $prodIndex = Get-PageNoThrow '/produksi' $session
+  $produksiIds = Extract-MongoIdsFromLinks $prodIndex.Content '/produksi/'
+  Print ("Produksi IDs found: {0}" -f $produksiIds.Count)
 
   # Uji Lab
   $ujiNew = Get-PageNoThrow '/uji-lab/new' $session
   if ($ujiNew.StatusCode -eq 200) {
-    $formulasiId = Extract-FirstSelectValue $ujiNew.Content 'formulasi'
+    $formulasiId = $null
+    if ($formulasiIds.Count -gt 0) {
+      $formulasiId = $formulasiIds[0]
+    }
     if ($formulasiId) {
       for ($i = 1; $i -le $count; $i++) {
         $today = Get-Date
@@ -345,7 +394,7 @@ if ($doMutate) {
         Print ("POST /uji-lab sample#{0} => {1}" -f $i, $r.StatusCode)
       }
     } else {
-      Print "SKIP Uji Lab: tidak ada opsi formulasi di /uji-lab/new"
+      Print "SKIP Uji Lab: tidak ada formulasi ID terdeteksi di /formulasi"
     }
   } else {
     Print ("SKIP Uji Lab: GET /uji-lab/new => {0}" -f $ujiNew.StatusCode)
@@ -353,11 +402,14 @@ if ($doMutate) {
 
   # Pengemasan
   $pkNew = Get-PageNoThrow '/pengemasan/new' $session
-  $produksiIdsForPack = Extract-SelectValuesByName $pkNew.Content 'produksi'
-  if ($pkNew.StatusCode -eq 200 -and $produksiIdsForPack.Count -gt 0) {
+  $produksiIdsForPack = $produksiIds
+  if ($pkNew.StatusCode -ne 200) {
+    Print ("WARN Pengemasan: GET /pengemasan/new => {0} (role?)" -f $pkNew.StatusCode)
+  }
+  if ($produksiIdsForPack.Count -gt 0) {
     for ($i = 1; $i -le $count; $i++) {
       $today = Get-Date
-      $pid = $produksiIdsForPack[($i - 1) % $produksiIdsForPack.Count]
+      $produksiIdSelected = $produksiIdsForPack[($i - 1) % $produksiIdsForPack.Count]
       $sert = @(
         @{ jenisSertifikat = 'BPOM'; nomorSertifikat = "MD-$runId-$i"; tanggalBerlaku = $today.ToString('yyyy-MM-dd') }
       )
@@ -365,7 +417,7 @@ if ($doMutate) {
         @{ tanggal = $today.ToString('yyyy-MM-dd'); aktivitas = 'QC'; hasil = 'OK' }
       )
       $body = @{
-        produksi = $pid
+        produksi = $produksiIdSelected
         tanggalKemas = $today.ToString('yyyy-MM-dd')
         jenisPengemas = 'Pouch'
         jumlahKemasan = '10'
@@ -385,20 +437,23 @@ if ($doMutate) {
       Print ("POST /pengemasan sample#{0} => {1}" -f $i, $r.StatusCode)
     }
   } else {
-    Print "SKIP Pengemasan: tidak ada produksi status Selesai di /pengemasan/new"
+    Print "SKIP Pengemasan: tidak ada produksi ID terdeteksi di /produksi"
   }
 
   # Distribusi
   $distNew = Get-PageNoThrow '/distribusi/new' $session
-  $produksiIdsForDist = Extract-SelectValuesByName $distNew.Content 'produksi'
-  if ($distNew.StatusCode -eq 200 -and $produksiIdsForDist.Count -gt 0) {
+  $produksiIdsForDist = $produksiIds
+  if ($distNew.StatusCode -ne 200) {
+    Print ("WARN Distribusi: GET /distribusi/new => {0} (role?)" -f $distNew.StatusCode)
+  }
+  if ($produksiIdsForDist.Count -gt 0) {
     for ($i = 1; $i -le $count; $i++) {
       $today = Get-Date
-      $pid = $produksiIdsForDist[($i - 1) % $produksiIdsForDist.Count]
+      $produksiIdSelected = $produksiIdsForDist[($i - 1) % $produksiIdsForDist.Count]
       $kode = "SMK-DST-$runId-$i"
       $body = @{
         kodeDistribusi = $kode
-        produksi = $pid
+        produksi = $produksiIdSelected
         tanggalDistribusi = $today.ToString('yyyy-MM-dd')
         jumlahProduk = '10'
         satuan = 'pcs'
@@ -423,7 +478,7 @@ if ($doMutate) {
       Print ("POST /distribusi sample#{0} => {1}" -f $i, $r.StatusCode)
     }
   } else {
-    Print "SKIP Distribusi: tidak ada produksi status Selesai di /distribusi/new"
+    Print "SKIP Distribusi: tidak ada produksi ID terdeteksi di /produksi"
   }
 
   # Laporan (5 contoh generate)
