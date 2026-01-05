@@ -7,11 +7,7 @@ class DistribusiController {
   // List semua distribusi
   async index(req, res) {
     try {
-      const query = req.session.user.role === 'Petugas Lapangan' 
-        ? { petugas: req.session.userId }
-        : {};
-      
-      const distribusi = await Distribusi.find(query)
+      const distribusi = await Distribusi.find({})
         .populate({
           path: 'produksi',
           populate: { path: 'formulasi', select: 'nama kode' }
@@ -199,11 +195,7 @@ class DistribusiController {
   // Export CSV
   async exportCsv(req, res) {
     try {
-      const query = req.session.user.role === 'Petugas Lapangan'
-        ? { petugas: req.session.userId }
-        : {};
-
-      const distribusi = await Distribusi.find(query)
+      const distribusi = await Distribusi.find({})
         .populate({
           path: 'produksi',
           populate: { path: 'formulasi', select: 'nama kode' }

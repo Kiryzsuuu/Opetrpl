@@ -6,11 +6,7 @@ class AnalisisGiziController {
   // List semua analisis gizi
   async index(req, res) {
     try {
-      const query = req.session.user.role === 'Peneliti' 
-        ? { analis: req.session.userId }
-        : {};
-      
-      const analisis = await AnalisisGizi.find(query)
+      const analisis = await AnalisisGizi.find({})
         .populate('formulasi', 'nama kode')
         .populate('analis', 'nama')
         .sort({ createdAt: -1 });
@@ -184,11 +180,7 @@ class AnalisisGiziController {
   // Export CSV
   async exportCsv(req, res) {
     try {
-      const query = req.session.user.role === 'Peneliti'
-        ? { analis: req.session.userId }
-        : {};
-
-      const analisis = await AnalisisGizi.find(query)
+      const analisis = await AnalisisGizi.find({})
         .populate('formulasi', 'nama kode')
         .populate('analis', 'nama email')
         .sort({ createdAt: -1 });

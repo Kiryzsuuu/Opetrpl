@@ -7,11 +7,7 @@ class UjiLabController {
   // List semua uji lab
   async index(req, res) {
     try {
-      const query = req.session.user.role === 'Peneliti' 
-        ? { penanggungJawab: req.session.userId }
-        : {};
-      
-      const ujiLab = await UjiLab.find(query)
+      const ujiLab = await UjiLab.find({})
         .populate('formulasi', 'nama kode')
         .populate('penanggungJawab', 'nama')
         .sort({ createdAt: -1 });
@@ -161,11 +157,7 @@ class UjiLabController {
   // Export CSV
   async exportCsv(req, res) {
     try {
-      const query = req.session.user.role === 'Peneliti'
-        ? { penanggungJawab: req.session.userId }
-        : {};
-
-      const ujiLab = await UjiLab.find(query)
+      const ujiLab = await UjiLab.find({})
         .populate('formulasi', 'nama kode')
         .populate('penanggungJawab', 'nama email')
         .sort({ createdAt: -1 });
