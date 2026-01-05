@@ -186,13 +186,8 @@ class AuthController {
 
   // Tampilkan halaman reset password
   async showResetPassword(req, res) {
-    const { token } = req.params;
-    res.render('auth/reset-password', {
-      title: 'Reset Password',
-      token,
-      success: req.flash('success'),
-      error: req.flash('error')
-    });
+    req.flash('success', 'Reset password sekarang menggunakan OTP. Silakan masukkan OTP yang dikirim ke email Anda.');
+    return res.redirect('/reset-password');
   }
 
   // Tampilkan halaman reset password via OTP
@@ -258,39 +253,8 @@ class AuthController {
 
   // Proses reset password
   async resetPassword(req, res) {
-    try {
-      const { token } = req.params;
-      const { password, confirmPassword } = req.body;
-
-      if (password !== confirmPassword) {
-        req.flash('error', 'Password dan Konfirmasi Password tidak sama');
-        return res.redirect(`/reset-password/${token}`);
-      }
-
-      const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
-
-      const user = await User.findOne({
-        resetPasswordTokenHash: tokenHash,
-        resetPasswordExpiresAt: { $gt: new Date() }
-      });
-
-      if (!user) {
-        req.flash('error', 'Link reset password tidak valid atau sudah kadaluarsa.');
-        return res.redirect('/forgot-password');
-      }
-
-      user.password = password;
-      user.resetPasswordTokenHash = undefined;
-      user.resetPasswordExpiresAt = undefined;
-      await user.save();
-
-      req.flash('success', 'Password berhasil direset. Silakan login.');
-      res.redirect('/login');
-    } catch (err) {
-      console.error(err);
-      req.flash('error', 'Terjadi kesalahan saat reset password');
-      res.redirect('/forgot-password');
-    }
+    req.flash('success', 'Reset password sekarang menggunakan OTP. Silakan minta OTP baru jika belum punya.');
+    return res.redirect('/forgot-password');
   }
 
   // Logout
