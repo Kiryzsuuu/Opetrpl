@@ -147,12 +147,14 @@
                 <% if (user.role === 'Admin' || user.role === 'Super Admin') { %>
                   <div class="mt-3">
                     <h6>Quick Actions:</h6>
-                    <a href="/komoditas/new" class="btn btn-sm btn-primary me-2">
-                      <i class="bi bi-plus"></i> Tambah Komoditas
-                    </a>
-                    <a href="/produksi/new" class="btn btn-sm btn-success">
-                      <i class="bi bi-plus"></i> Buat Rencana Produksi
-                    </a>
+                    <div class="d-flex gap-2 flex-wrap">
+                      <a href="/komoditas/new" class="btn btn-sm btn-primary flex-fill text-center">
+                        <i class="bi bi-plus"></i> Tambah Komoditas
+                      </a>
+                      <a href="/produksi/new" class="btn btn-sm btn-success flex-fill text-center">
+                        <i class="bi bi-plus"></i> Buat Rencana Produksi
+                      </a>
+                    </div>
                   </div>
                 <% } else if (user.role === 'Peneliti') { %>
                   <div class="mt-3">
